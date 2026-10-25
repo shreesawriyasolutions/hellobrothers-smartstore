@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Website Visitors | Hello Brothers Smart Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Hind:wght@400;500;600&family=Noto+Sans+Gurmukhi:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="sale.css">
+  <link rel="stylesheet" href="repairs.css">
+  <style>
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat { background: var(--card2); border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+    .stat .n { font-size: 26px; font-weight: 800; color: var(--green); }
+    .stat .t { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .bars { display: flex; align-items: flex-end; gap: 4px; height: 120px; margin-top: 8px; }
+    .bar { flex: 1; background: var(--green); border-radius: 4px 4px 0 0; min-height: 2px; position: relative; }
+    .bar.zero { background: var(--line); }
+    .bar-labels { display: flex; gap: 4px; margin-top: 4px; }
+    .bar-labels span { flex: 1; min-width: 0; overflow: hidden; text-align: center; font-size: 10px; color: var(--muted); }
+    .rowline { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14px; word-break: break-all; }
+    .rowline:last-child { border-bottom: none; }
+    .rowline b { color: var(--green); white-space: nowrap; }
+    .note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+    @media (min-width: 700px) { .stats { grid-template-columns: repeat(4, 1fr); } }
+  </style>
+</head>
+<body>
+
+  <section id="loginView" class="login-wrap hidden">
+    <div class="card login-card">
+      <img src="logo.png" alt="Hello Brothers Smart Store" class="logo" onerror="this.style.display='none'">
+      <h1>HELLO BROTHERS SMART STORE</h1>
+      <p class="muted">Website Visitors (Admin only)</p>
+      <form id="loginForm" autocomplete="on">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" inputmode="email" autocomplete="username" required>
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" required>
+        <button type="submit" id="loginBtn" class="btn btn-green btn-block">Login</button>
+      </form>
+      <a class="home-link" href="index.html">&larr; Home</a>
+    </div>
+  </section>
+
+  <section id="appView" class="hidden">
+    <header class="topbar">
+      <div class="brand">
+        <img src="logo.png" alt="" class="logo-small" onerror="this.style.display='none'">
+        <div>
+          <div class="brand-title">WEBSITE VISITORS</div>
+          <div class="brand-sub">Hello Brothers Smart Store</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <a href="repairs-admin.html" class="btn btn-ghost nav-link">Repairs</a>
+        <button type="button" id="refreshBtn" class="btn btn-ghost">Refresh</button>
+        <button type="button" id="logoutBtn" class="btn btn-ghost">Logout</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="card">
+        <h2>Visits</h2>
+        <div class="stats" id="stats"></div>
+        <div class="note" id="lastVisit"></div>
+      </div>
+      <div class="card">
+        <h2>Pichhle 14 din</h2>
+        <div class="bars" id="bars"></div>
+        <div class="bar-labels" id="barLabels"></div>
+      </div>
+      <div class="card"><h2>Sabse zyada dekhe gaye pages (30 din)</h2><div id="pages"></div></div>
+      <div class="card"><h2>Log kahan se aaye (30 din)</h2><div id="refs"></div></div>
+      <div class="card"><h2>Mobile / Computer (30 din)</h2><div id="devs"></div></div>
+      <div class="card"><h2>Taza visits</h2><div id="recent"></div>
+        <div class="note">Privacy: yahan kisi ka naam, number, IP ya location save nahi hota. Sirf anonymous ginti hai. Aapki apni (login wali) visits ginti mein nahi judti.</div>
+      </div>
+    </main>
+  </section>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="visitors.js"></script>
+</body>
+</html>

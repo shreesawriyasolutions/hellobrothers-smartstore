@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Repair Manager | Hello Brothers Smart Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Hind:wght@400;500;600&family=Noto+Sans+Gurmukhi:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="sale.css">
+  <link rel="stylesheet" href="repairs.css">
+</head>
+<body>
+
+  <!-- ============ LOGIN SCREEN ============ -->
+  <section id="loginView" class="login-wrap hidden">
+    <div class="card login-card">
+      <img src="logo.png" alt="Hello Brothers Smart Store" class="logo" onerror="this.style.display='none'">
+      <h1>HELLO BROTHERS SMART STORE</h1>
+      <p class="muted">Repair Manager</p>
+
+      <div class="role-tabs">
+        <button type="button" id="tabStaff" class="role-tab active">Staff Login</button>
+        <button type="button" id="tabAdmin" class="role-tab">Admin Login</button>
+      </div>
+
+      <form id="loginForm" autocomplete="on">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" inputmode="email" autocomplete="username" required>
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" required>
+        <button type="submit" id="loginBtn" class="btn btn-green btn-block">Login</button>
+      </form>
+      <a class="home-link" href="index.html">&larr; Home</a>
+    </div>
+  </section>
+
+  <!-- ============ MAIN APP ============ -->
+  <section id="appView" class="hidden">
+    <header class="topbar">
+      <div class="brand">
+        <img src="logo.png" alt="" class="logo-small" onerror="this.style.display='none'">
+        <div>
+          <div class="brand-title">REPAIR MANAGER</div>
+          <div class="brand-sub">Hello Brothers Smart Store &bull; <span id="todayText"></span></div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span id="modeBadge" class="badge"></span>
+        <a href="sale.html" class="btn btn-ghost nav-link">Sale</a>
+        <a href="bills.html" class="btn btn-ghost nav-link">Bills</a>
+        <a href="visitors.html" id="visitorsLink" class="btn btn-ghost nav-link hidden">Visitors</a>
+        <button type="button" id="logoutBtn" class="btn btn-ghost">Logout</button>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- Naya repair add -->
+      <div class="card">
+        <h2>+ Naya Repair Add Karo</h2>
+        <form id="repairForm" novalidate>
+          <div class="grid2">
+            <div>
+              <label for="rMobile">Mobile Number * (10 digit)</label>
+              <input id="rMobile" type="tel" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="9876543210">
+              <div id="rHint" class="hint"></div>
+            </div>
+            <div>
+              <label for="rName">Customer Name *</label>
+              <input id="rName" type="text" autocomplete="off" list="custList" placeholder="Purana customer ho to naam likhna shuru karo">
+              <datalist id="custList"></datalist>
+            </div>
+            <div>
+              <label for="rModel">Phone Model *</label>
+              <input id="rModel" type="text" autocomplete="off" placeholder="Jaise: iPhone 13">
+            </div>
+            <div>
+              <label for="rDate">Received Date *</label>
+              <input id="rDate" type="date">
+            </div>
+            <div>
+              <label for="rStatus">Status *</label>
+              <select id="rStatus"></select>
+            </div>
+            <div>
+              <label for="rCharge">Estimated Charges (₹)</label>
+              <input id="rCharge" type="number" inputmode="decimal" min="0" step="0.01">
+            </div>
+            <div>
+              <label for="rDelivery">Estimated Delivery Date</label>
+              <input id="rDelivery" type="date">
+            </div>
+          </div>
+          <label for="rProblem">Problem (kya kharabi hai)</label>
+          <input id="rProblem" type="text" autocomplete="off" placeholder="Jaise: Screen toot gayi">
+          <label for="rPublic">Customer ko dikhne wala note (optional)</label>
+          <textarea id="rPublic" rows="2" placeholder="Ye customer ko track page par dikhega"></textarea>
+          <label for="rInternal">Internal note (sirf team ko dikhega)</label>
+          <textarea id="rInternal" rows="2" placeholder="Ye customer ko kabhi nahi dikhega"></textarea>
+          <button type="submit" id="addBtn" class="btn btn-green btn-block">Add Repair</button>
+        </form>
+
+        <div id="addedBox" class="added-box hidden"></div>
+      </div>
+
+      <!-- Search -->
+      <div class="card">
+        <div class="grid2">
+          <div>
+            <label for="searchBox">Search (mobile, Repair ID, naam ya model)</label>
+            <input id="searchBox" type="search" autocomplete="off" list="custList" placeholder="9876543210, HBS-0001 ya naam">
+          </div>
+          <div>
+            <label for="statusFilter">Status Filter</label>
+            <select id="statusFilter"></select>
+          </div>
+        </div>
+        <button type="button" id="searchBtn" class="btn btn-blue btn-block">Search</button>
+        <button type="button" id="exportBtn" class="btn btn-ghost btn-block hidden">Download CSV</button>
+        <div id="summary" class="period-label"></div>
+      </div>
+
+      <div id="repairList"></div>
+
+    </main>
+  </section>
+
+  <!-- ============ EDIT POPUP (Admin only) ============ -->
+  <div id="editModal" class="modal hidden">
+    <div class="modal-box">
+      <h2>Edit Repair</h2>
+      <form id="editForm" novalidate>
+        <input type="hidden" id="eId">
+        <input type="hidden" id="eCustId">
+        <div class="grid2">
+          <div><label for="eName">Customer Name *</label><input id="eName" type="text" required></div>
+          <div><label for="eModel">Phone Model *</label><input id="eModel" type="text" required></div>
+          <div><label for="eDate">Received Date *</label><input id="eDate" type="date" required></div>
+          <div><label for="eCharge">Estimated Charges (₹)</label><input id="eCharge" type="number" inputmode="decimal" min="0" step="0.01"></div>
+          <div><label for="eDelivery">Estimated Delivery Date</label><input id="eDelivery" type="date"></div>
+          <div><label for="eProblem">Problem</label><input id="eProblem" type="text"></div>
+        </div>
+        <label for="ePublic">Customer ko dikhne wala note</label>
+        <textarea id="ePublic" rows="2"></textarea>
+        <label for="eInternal">Internal note (sirf team)</label>
+        <textarea id="eInternal" rows="2"></textarea>
+        <div class="grid2">
+          <button type="submit" class="btn btn-green btn-block">Save Changes</button>
+          <button type="button" id="editCancel" class="btn btn-ghost btn-block">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="repairs-admin.js"></script>
+</body>
+</html>

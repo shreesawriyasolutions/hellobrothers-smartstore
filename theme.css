@@ -1,0 +1,39 @@
+/* ==========================================================
+   Hello Brothers Smart Store — theme tokens + page background
+   Same "liquid glass" look as the home page (index.html).
+   Loaded by every inner page (public and admin).
+   ========================================================== */
+
+:root{
+  --paper:#F1ECF8; --ink:#140B24; --ink-2:#4B3F5E; --green:#5B21B6; --green-deep:#3B0F7A; --signal:#F4C430; --wa:#1FA855;
+  --glass:rgba(255,255,255,.46); --glass-strong:rgba(255,255,255,.66); --edge:rgba(255,255,255,.75); --line:rgba(11,22,18,.12);
+  --shadow:0 24px 48px -24px rgba(59,15,122,.45);
+  --r-lg:26px; --r-md:18px;
+  --head:'Bricolage Grotesque','Hind',system-ui,sans-serif;
+  --body:'Hind','Noto Sans Gurmukhi',system-ui,sans-serif;
+  --blob-a:#C026D3; --blob-b:#F4C430; --blob-c:#6366F1; --blob-o:.55;
+  --field:rgba(255,255,255,.6);
+}
+@media (prefers-color-scheme:dark){
+  :root{--paper:#0E0816; --ink:#F3EEF8; --ink-2:#B9AECB; --green:#B794F6; --green-deep:#1A0B33;
+    --glass:rgba(34,24,48,.5); --glass-strong:rgba(42,30,60,.72); --edge:rgba(255,255,255,.18); --line:rgba(255,255,255,.12);
+    --shadow:0 24px 48px -24px rgba(0,0,0,.7); --blob-a:#7E1D8F; --blob-b:#8A6D0C; --blob-c:#3730A3; --blob-o:.5;
+    --field:rgba(255,255,255,.07)}
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%}
+body{font-family:var(--body);background:var(--paper);color:var(--ink);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:3px solid var(--signal);outline-offset:3px;border-radius:8px}
+h1,h2,h3,h4{font-family:var(--head);line-height:1.1;letter-spacing:-.02em}
+.hidden{display:none!important}
+
+/* living background (no extra markup needed) */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(520px 520px at 6% 4%,var(--blob-a),transparent 70%),
+    radial-gradient(420px 420px at 96% 40%,var(--blob-b),transparent 70%),
+    radial-gradient(520px 520px at 38% 104%,var(--blob-c),transparent 70%);
+  opacity:var(--blob-o)}

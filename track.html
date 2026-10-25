@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Track Your Repair | Hello Brothers Smart Store</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Hind:wght@400;500;600&family=Noto+Sans+Gurmukhi:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="site.css">
+  <link rel="stylesheet" href="track.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="index.html" class="brand">
+      <img src="logo.png" alt="Hello Brothers Smart Store">
+      <span>HELLO BROTHERS SMART STORE</span>
+    </a>
+    <div class="nav-right">
+      <a href="index.html" class="back" data-i18n="back">&larr; Home</a>
+      <div class="lang">
+        <button type="button" class="lb active" data-lang="en">EN</button>
+        <button type="button" class="lb" data-lang="hi">हिं</button>
+        <button type="button" class="lb" data-lang="pa">ਪੰ</button>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <span class="tag" data-i18n="tag">REPAIR STATUS</span>
+    <h1 data-i18n="h1">Check Your Phone Status</h1>
+    <p data-i18n="sub">Enter your registered mobile number. All your phones will show together.</p>
+  </header>
+
+  <main class="wrap">
+    <div class="box">
+      <form id="trackForm" novalidate>
+        <label for="mobile" data-i18n="label">Mobile Number</label>
+        <div class="row">
+          <input id="mobile" type="tel" inputmode="numeric" maxlength="10" autocomplete="tel-national" data-i18n-ph="ph" placeholder="10-digit mobile number">
+          <button type="submit" id="goBtn" data-i18n="btn">Check Status</button>
+        </div>
+      </form>
+      <div class="note" data-i18n="note">Only the mobile number given at the shop will work.</div>
+    </div>
+
+    <div id="result"></div>
+  </main>
+
+  <footer>
+    <div class="wrap foot" style="max-width:620px;padding:0 16px">
+      <div class="fb"><img src="logo.png" alt="Hello Brothers Smart Store" width="56" height="56"><div><b>HELLO BROTHERS SMART STORE</b><span>M.G. Road, Opp. Shri Ram Studio, Safidon, Jind, Haryana</span><span>+91 94684 51460 &middot; +91 86850 76900</span></div></div>
+      <span class="copy">&copy; 2026 Hello Brothers Smart Store. All Rights Reserved.</span>
+    </div>
+  </footer>
+
+  <div class="float">
+    <a href="https://wa.me/919468451460" class="fab wa" aria-label="WhatsApp">WA</a>
+    <a href="tel:+919468451460" class="fab call" aria-label="Call">Call</a>
+  </div>
+
+  <script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="track.js"></script>
+<script src="diwali.js" defer></script>
+<script src="visits.js" defer></script>
+</body>
+</html>

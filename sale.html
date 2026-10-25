@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Daily Sale Register | Hello Brothers Smart Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Hind:wght@400;500;600&family=Noto+Sans+Gurmukhi:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="sale.css">
+</head>
+<body>
+
+  <!-- ============ LOGIN SCREEN ============ -->
+  <section id="loginView" class="login-wrap">
+    <div class="card login-card">
+      <img src="logo.png" alt="Hello Brothers Smart Store" class="logo" onerror="this.style.display='none'">
+      <h1>HELLO BROTHERS SMART STORE</h1>
+      <p class="muted">Daily Sale Register</p>
+
+      <div class="role-tabs">
+        <button type="button" id="tabStaff" class="role-tab active">Staff Login</button>
+        <button type="button" id="tabAdmin" class="role-tab">Admin Login</button>
+      </div>
+
+      <form id="loginForm" autocomplete="on">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" inputmode="email" autocomplete="username" required>
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" required>
+        <button type="submit" id="loginBtn" class="btn btn-green btn-block">Login</button>
+      </form>
+      <a class="home-link" href="index.html">&larr; Home</a>
+    </div>
+  </section>
+
+  <!-- ============ MAIN APP ============ -->
+  <section id="appView" class="hidden">
+    <header class="topbar">
+      <div class="brand">
+        <img src="logo.png" alt="" class="logo-small" onerror="this.style.display='none'">
+        <div>
+          <div class="brand-title">DAILY SALE REGISTER</div>
+          <div class="brand-sub">Hello Brothers Smart Store &bull; <span id="todayText"></span></div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span id="modeBadge" class="badge"></span>
+        <button type="button" id="logoutBtn" class="btn btn-ghost">Logout</button>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- Filters -->
+      <div id="filterSection">
+        <div class="filters">
+          <button type="button" class="filter-btn active" data-mode="today">Today</button>
+          <button type="button" class="filter-btn" data-mode="single">Single Date</button>
+          <button type="button" class="filter-btn" data-mode="range">Date Range</button>
+          <button type="button" class="filter-btn" data-mode="all">All Time</button>
+        </div>
+
+        <div id="singleBox" class="card hidden">
+          <label for="singleDate">Date</label>
+          <input id="singleDate" type="date">
+        </div>
+
+        <div id="rangeBox" class="card hidden">
+          <div class="grid2">
+            <div>
+              <label for="startDate">Start Date</label>
+              <input id="startDate" type="date">
+            </div>
+            <div>
+              <label for="endDate">End Date</label>
+              <input id="endDate" type="date">
+            </div>
+          </div>
+          <button type="button" id="applyRange" class="btn btn-blue btn-block">Show Report</button>
+        </div>
+
+        <div id="periodLabel" class="period-label"></div>
+
+        <!-- Totals -->
+        <div class="totals">
+          <div class="total-card"><div class="t-label">Total Sale</div><div class="t-value" id="totSale">₹0</div></div>
+          <div class="total-card"><div class="t-label">Total Kharcha</div><div class="t-value red" id="totExpense">₹0</div></div>
+          <div class="total-card"><div class="t-label">Total Profit</div><div class="t-value green" id="totProfit">₹0</div></div>
+          <div class="total-card"><div class="t-label">Entries</div><div class="t-value" id="totCount">0</div></div>
+        </div>
+      </div>
+
+      <!-- Add New Entry -->
+      <div class="card">
+        <h2>+ Add New Entry</h2>
+        <form id="entryForm" novalidate>
+          <div class="grid2">
+            <div>
+              <label for="fDate">Date *</label>
+              <input id="fDate" type="date" required>
+            </div>
+            <div>
+              <label for="fCustomer">Customer Name (optional)</label>
+              <input id="fCustomer" type="text" autocomplete="off">
+            </div>
+            <div>
+              <label for="fWork">Kaam / Sale *</label>
+              <input id="fWork" type="text" autocomplete="off" required>
+            </div>
+            <div>
+              <label for="fAmount">Kitne Paise Liye (₹) *</label>
+              <input id="fAmount" type="number" inputmode="decimal" min="0" step="0.01" required>
+            </div>
+            <div>
+              <label for="fExpense">Kharcha (₹) *</label>
+              <input id="fExpense" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0" required>
+            </div>
+            <div>
+              <label for="fPayment">Payment Mode *</label>
+              <select id="fPayment">
+                <option>Cash</option>
+                <option>UPI</option>
+                <option>Card</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label for="fStaff">Your Name / Staff Name *</label>
+              <input id="fStaff" type="text" autocomplete="off" required>
+            </div>
+            <div>
+              <label>Profit (auto)</label>
+              <div id="fProfit" class="profit-preview">₹0</div>
+            </div>
+          </div>
+          <label for="fNotes">Notes (optional)</label>
+          <textarea id="fNotes" rows="2"></textarea>
+          <button type="submit" id="addBtn" class="btn btn-green btn-block">Add Entry</button>
+        </form>
+      </div>
+
+      <!-- List -->
+      <div id="listSection">
+        <div class="card">
+          <label for="searchBox">Search</label>
+          <input id="searchBox" type="search" placeholder="Customer, work, staff ya notes se search karo" autocomplete="off">
+          <button type="button" id="exportBtn" class="btn btn-blue btn-block hidden">Download CSV</button>
+        </div>
+        <div id="entriesList"></div>
+      </div>
+
+      <div id="noViewMsg" class="card hidden">
+        <p class="muted">Aapki entry save ho jati hai. Purani entries dekhne ki permission Admin ke paas hai.</p>
+      </div>
+
+    </main>
+  </section>
+
+  <!-- ============ EDIT POPUP (Admin only) ============ -->
+  <div id="editModal" class="modal hidden">
+    <div class="modal-box">
+      <h2>Edit Entry</h2>
+      <form id="editForm" novalidate>
+        <input type="hidden" id="eId">
+        <div class="grid2">
+          <div><label for="eDate">Date *</label><input id="eDate" type="date" required></div>
+          <div><label for="eCustomer">Customer Name</label><input id="eCustomer" type="text"></div>
+          <div><label for="eWork">Kaam / Sale *</label><input id="eWork" type="text" required></div>
+          <div><label for="eAmount">Kitne Paise Liye (₹) *</label><input id="eAmount" type="number" inputmode="decimal" min="0" step="0.01" required></div>
+          <div><label for="eExpense">Kharcha (₹) *</label><input id="eExpense" type="number" inputmode="decimal" min="0" step="0.01" required></div>
+          <div>
+            <label for="ePayment">Payment Mode *</label>
+            <select id="ePayment"><option>Cash</option><option>UPI</option><option>Card</option><option>Other</option></select>
+          </div>
+          <div><label for="eStaff">Staff Name *</label><input id="eStaff" type="text" required></div>
+        </div>
+        <label for="eNotes">Notes</label>
+        <textarea id="eNotes" rows="2"></textarea>
+        <div class="grid2">
+          <button type="submit" class="btn btn-green btn-block">Save Changes</button>
+          <button type="button" id="editCancel" class="btn btn-ghost btn-block">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="sale.js"></script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Bills Register | Hello Brothers Smart Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Hind:wght@400;500;600&family=Noto+Sans+Gurmukhi:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="sale.css">
+  <link rel="stylesheet" href="bills.css">
+  <style>
+    /* ===== Type cards: Purchase / Sale / Unlocking ===== */
+    .type-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+    .type-card {
+      text-align: left; cursor: pointer; font: inherit; color: inherit;
+      background: var(--glass-strong); border: 2px solid var(--edge); border-radius: 16px;
+      padding: 12px; transition: border-color .15s, box-shadow .15s;
+    }
+    .type-card:hover { border-color: var(--green); }
+    .type-card.active { border-color: var(--green); box-shadow: 0 0 0 3px rgba(10, 90, 72, .22); }
+    .type-card .tc-name { font-size: 13px; font-weight: 700; color: var(--muted); }
+    .type-card .tc-amount { font-size: 20px; font-weight: 800; margin-top: 4px; color: var(--ok); }
+    .type-card .tc-count { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .type-card.tc-purchase .tc-amount { color: #c2410c; }
+    .type-card.tc-sale .tc-amount { color: var(--ok); }
+    .type-card.tc-unlock .tc-amount { color: var(--blue); }
+    .type-card.tc-all .tc-amount { color: var(--text); }
+  </style>
+</head>
+<body>
+
+  <!-- ============ LOGIN SCREEN ============ -->
+  <section id="loginView" class="login-wrap hidden">
+    <div class="card login-card">
+      <img src="logo.png" alt="Hello Brothers Smart Store" class="logo" onerror="this.style.display='none'">
+      <h1>HELLO BROTHERS SMART STORE</h1>
+      <p class="muted">Bills Register</p>
+
+      <div class="role-tabs">
+        <button type="button" id="tabStaff" class="role-tab active">Staff Login</button>
+        <button type="button" id="tabAdmin" class="role-tab">Admin Login</button>
+      </div>
+
+      <form id="loginForm" autocomplete="on">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" inputmode="email" autocomplete="username" required>
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" required>
+        <button type="submit" id="loginBtn" class="btn btn-green btn-block">Login</button>
+      </form>
+      <a class="home-link" href="index.html">&larr; Home</a>
+    </div>
+  </section>
+
+  <!-- ============ MAIN APP ============ -->
+  <section id="appView" class="hidden">
+    <header class="topbar">
+      <div class="brand">
+        <img src="logo.png" alt="" class="logo-small" onerror="this.style.display='none'">
+        <div>
+          <div class="brand-title">BILLS REGISTER</div>
+          <div class="brand-sub">Hello Brothers Smart Store &bull; <span id="todayText"></span></div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span id="modeBadge" class="badge"></span>
+        <a href="sale.html" class="btn btn-ghost nav-link">Sale Register</a>
+        <button type="button" id="logoutBtn" class="btn btn-ghost">Logout</button>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- Upload form -->
+      <div class="card">
+        <h2>+ Upload New Bill</h2>
+        <form id="billForm" novalidate>
+          <div class="grid2">
+            <div>
+              <label for="bType">Bill Type *</label>
+              <select id="bType">
+                <option>Purchase Bill</option>
+                <option>Sale Bill</option>
+                <option>Unlocking Job</option>
+              </select>
+            </div>
+            <div>
+              <label for="bDate">Date *</label>
+              <input id="bDate" type="date" required>
+            </div>
+            <div>
+              <label for="bParty" id="bPartyLabel">Supplier / Party Name *</label>
+              <input id="bParty" type="text" autocomplete="off" required>
+            </div>
+            <div>
+              <label for="bMobile">Mobile Number (optional)</label>
+              <input id="bMobile" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digit" autocomplete="off">
+            </div>
+            <div>
+              <label for="bAmount">Amount (₹) (optional)</label>
+              <input id="bAmount" type="number" inputmode="decimal" min="0" step="0.01">
+            </div>
+            <div>
+              <label for="bStaff">Your Name / Staff Name *</label>
+              <input id="bStaff" type="text" autocomplete="off" required>
+            </div>
+          </div>
+
+          <!-- Sirf Unlocking Job me dikhega -->
+          <div id="unlockFields" class="hidden">
+            <div class="grid2">
+              <div>
+                <label for="bModel">Phone Model *</label>
+                <input id="bModel" type="text" autocomplete="off" placeholder="Jaise: Redmi Note 12">
+              </div>
+              <div>
+                <label for="bImei">IMEI Number * (15 digit)</label>
+                <input id="bImei" type="text" inputmode="numeric" maxlength="15" autocomplete="off" placeholder="*#06# dial karke dekho">
+              </div>
+              <div>
+                <label for="bWork">Kaam ka Type *</label>
+                <select id="bWork">
+                  <option>Software</option>
+                  <option>FRP Unlock</option>
+                  <option>Screen Lock / Pattern</option>
+                  <option>iCloud</option>
+                  <option>Network Unlock</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <label for="bNotes">Notes (optional)</label>
+          <textarea id="bNotes" rows="2"></textarea>
+
+          <div class="file-box">
+            <label for="bFile">Bill ki Photo ya PDF * (ek saath kai file chun sakte ho, max 10)</label>
+            <input id="bFile" type="file" accept="image/*,application/pdf" multiple>
+            <div class="hint">Ek se zyada file chunne ke liye gallery me sab select karo. Photo apne aap chhoti ho jati hai.</div>
+          </div>
+
+          <div id="idFileBox" class="file-box hidden">
+            <label for="bIdFile">Customer ID ki Photo (optional, aage-peeche dono chun sakte ho, max 4)</label>
+            <input id="bIdFile" type="file" accept="image/*,application/pdf" multiple>
+            <div class="hint">Ye photo sirf Admin dekh payega. Aadhaar ho to masked copy lena behtar hai.</div>
+          </div>
+
+          <button type="submit" id="uploadBtn" class="btn btn-green btn-block">Upload Bill</button>
+        </form>
+      </div>
+
+      <!-- Admin ko dikhne wala hissa -->
+      <div id="adminSection" class="hidden">
+
+        <div class="filters">
+          <button type="button" class="filter-btn" data-mode="today">Today</button>
+          <button type="button" class="filter-btn" data-mode="single">Single Date</button>
+          <button type="button" class="filter-btn" data-mode="range">Date Range</button>
+          <button type="button" class="filter-btn active" data-mode="all">All Time</button>
+        </div>
+
+        <div id="singleBox" class="card hidden">
+          <label for="singleDate">Date</label>
+          <input id="singleDate" type="date">
+        </div>
+
+        <div id="rangeBox" class="card hidden">
+          <div class="grid2">
+            <div>
+              <label for="startDate">Start Date</label>
+              <input id="startDate" type="date">
+            </div>
+            <div>
+              <label for="endDate">End Date</label>
+              <input id="endDate" type="date">
+            </div>
+          </div>
+          <button type="button" id="applyRange" class="btn btn-blue btn-block">Show Bills</button>
+        </div>
+
+        <div id="periodLabel" class="period-label"></div>
+
+        <!-- Alag-alag type ke cards: click karne par sirf usi type ke bills dikhenge -->
+        <div id="typeCards" class="type-cards"></div>
+
+        <div class="totals">
+          <div class="total-card"><div class="t-label" id="totCountLabel">Total Bills</div><div class="t-value" id="totCount">0</div></div>
+          <div class="total-card"><div class="t-label" id="totAmountLabel">Total Amount</div><div class="t-value green" id="totAmount">₹0</div></div>
+        </div>
+
+        <div class="card">
+          <label for="searchBox">Search</label>
+          <input id="searchBox" type="search" placeholder="Naam, mobile, IMEI, model ya notes" autocomplete="off">
+          <button type="button" id="exportBtn" class="btn btn-blue btn-block">Download CSV</button>
+        </div>
+
+        <div id="billsList"></div>
+      </div>
+
+      <div id="noViewMsg" class="card hidden">
+        <p class="muted">Aapka bill save ho jata hai. Bills dekhne ki permission sirf Admin ke paas hai.</p>
+      </div>
+
+    </main>
+  </section>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="bills.js"></script>
+</body>
+</html>

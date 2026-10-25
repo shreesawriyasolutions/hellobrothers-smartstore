@@ -1,0 +1,45 @@
+/* Bills page ki extra styling (baaki styling sale.css se aati hai) */
+
+.nav-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.file-box {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: var(--card2);
+}
+
+.file-box input[type="file"] {
+  background: var(--card);
+  padding: 10px;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.type-badge {
+  display: inline-block;
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid;
+}
+.type-badge.purchase { color: var(--blue); border-color: rgba(37,99,235,.5); background: rgba(37,99,235,.12); }
+.type-badge.sale { color: var(--ok); border-color: rgba(31,168,85,.5); background: rgba(31,168,85,.12); }
+.type-badge.unlock { color: var(--amber); border-color: rgba(183,121,31,.5); background: rgba(183,121,31,.12); }
+
+.bill-info { margin-top: 8px; font-size: 14px; color: var(--text); word-break: break-word; }
+.bill-info div { margin-top: 3px; }
+.bill-info span { color: var(--muted); }
+
+.bill-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.bill-actions .btn { flex: 1 1 120px; padding: 10px; min-height: 44px; font-size: 14px; }

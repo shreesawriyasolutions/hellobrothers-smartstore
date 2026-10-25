@@ -1,0 +1,84 @@
+/* ==========================================================
+   DIWALI 2026 — temporary festive theme (loaded by diwali.js,
+   which stops loading this file after 10 Nov 2026).
+   ========================================================== */
+
+/* warm festive colours (the site's own variables are re-tinted) */
+html.diwali{
+  --paper:#FBF0E1; --signal:#FFC23C;
+  --blob-a:#FF9F1C; --blob-b:#FFD166; --blob-c:#F4796B; --blob-o:.5;
+  --dw-h:0px;
+  padding-top:var(--dw-h);
+}
+@media (prefers-color-scheme:dark){
+  html.diwali{--paper:#150C07; --blob-a:#9A4A00; --blob-b:#8A6D0C; --blob-c:#7A2A22; --blob-o:.55}
+}
+
+/* greeting strip at the top (scrolls away with the page) */
+.dw-strip{
+  position:absolute; top:0; left:0; right:0; z-index:50;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  padding:7px 44px 9px; text-align:center;
+  color:#FFF3D6; font:600 .88rem/1.25 'Hind','Noto Sans Gurmukhi',system-ui,sans-serif; letter-spacing:.01em;
+  background:linear-gradient(180deg,#6E1A0A,#A92E0E 65%,#CE4A1B);
+  border-bottom:1px solid rgba(255,214,120,.55);
+  box-shadow:0 8px 20px -10px rgba(110,26,10,.8);
+}
+.dw-msg{text-shadow:0 1px 0 rgba(0,0,0,.25)}
+.dw-diya{flex:none;overflow:visible;filter:drop-shadow(0 0 6px rgba(255,190,60,.8))}
+.dw-flame{transform-box:fill-box;transform-origin:50% 100%;animation:dwFlame 1.1s ease-in-out infinite alternate}
+.dw-diya .dw-flame+.dw-flame{animation-duration:.8s}
+@keyframes dwFlame{0%{transform:scale(1,1) skewX(0)}50%{transform:scale(.92,1.08) skewX(-3deg)}100%{transform:scale(1.04,.94) skewX(3deg)}}
+
+.dw-x{
+  position:absolute; right:8px; top:50%; transform:translateY(-50%);
+  width:28px; height:28px; border:0; border-radius:50%;
+  background:rgba(255,255,255,.14); color:#FFF3D6; font:400 1.25rem/1 system-ui,sans-serif; cursor:pointer;
+}
+.dw-x:hover{background:rgba(255,255,255,.28)}
+
+/* string of twinkling lights hanging under the strip */
+.dw-lights{
+  position:absolute; left:0; right:0; bottom:-13px; height:16px; pointer-events:none;
+  background:
+    radial-gradient(circle at 14px 9px,#FFD54A 0 3.5px,rgba(255,213,74,.4) 4px,transparent 8px),
+    radial-gradient(circle at 70px 9px,#FF5A3C 0 3.5px,rgba(255,90,60,.4) 4px,transparent 8px),
+    linear-gradient(#9a6a1c,#9a6a1c);
+  background-size:112px 16px,112px 16px,100% 1px;
+  background-repeat:repeat-x,repeat-x,no-repeat;
+  animation:dwTwinkle 1.8s ease-in-out infinite;
+}
+.dw-lights.b{
+  background:
+    radial-gradient(circle at 42px 9px,#FF9F1C 0 3.5px,rgba(255,159,28,.4) 4px,transparent 8px),
+    radial-gradient(circle at 98px 9px,#FFF1A8 0 3.5px,rgba(255,241,168,.4) 4px,transparent 8px);
+  background-size:112px 16px,112px 16px;
+  background-repeat:repeat-x,repeat-x;
+  animation-delay:.9s;
+}
+@keyframes dwTwinkle{0%,100%{opacity:1;filter:brightness(1.15)}50%{opacity:.4;filter:brightness(.8)}}
+
+/* floating sparkles, behind the page content */
+.dw-fx{position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:-1}
+.dw-fx i{
+  position:absolute; bottom:-12px; border-radius:50%; opacity:0;
+  background:radial-gradient(circle,#FFF2B8 0,#FFB627 45%,transparent 72%);
+  animation:dwRise linear infinite;
+}
+/* rockets / anar / bum crackers (drawn on a canvas by diwali.js) */
+.dw-fw{position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:-1; opacity:1}
+@keyframes dwRise{
+  0%{transform:translate(0,0) scale(.6); opacity:0}
+  12%{opacity:.9}
+  50%{transform:translate(var(--sx),-55vh) scale(1)}
+  100%{transform:translate(calc(var(--sx) * -1),-112vh) scale(.5); opacity:0}
+}
+
+@media (max-width:560px){
+  .dw-strip{font-size:.8rem; padding:6px 38px 8px; gap:6px}
+  .dw-diya{width:22px; height:20px}
+}
+@media (prefers-reduced-motion:reduce){
+  .dw-flame,.dw-lights,.dw-fx i{animation:none!important}
+  .dw-fx{display:none}
+}
