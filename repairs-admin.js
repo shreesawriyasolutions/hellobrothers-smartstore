@@ -10,6 +10,19 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const STATUSES = ['Received', 'Diagnosing', 'Repair in Progress', 'Waiting for Part', 'Ready for Pickup', 'Delivered', 'Returned'];
 const TRACK_LINK = 'https://shreesawriyasolutions.github.io/hellobrothers-smartstore/track.html';
 
+// Receive karte waqt ki checklist
+const ACCESSORIES = ['SIM', 'Memory Card', 'Back Cover', 'Charger', 'Cable', 'Box', 'Earphone'];
+const CONDITIONS = ['Phone ON hota hai', 'Phone dead', 'Screen tooti', 'Back tooti', 'Pani laga', 'Body dent/scratch',
+  'Touch theek', 'Camera theek', 'Speaker/Mic theek', 'Charging theek', 'Face ID/Fingerprint theek'];
+const WARRANTY_OPTIONS = [[0, 'Koi warranty nahi'], [7, '7 din'], [15, '15 din'], [30, '1 mahina'], [90, '3 mahine'], [180, '6 mahine']];
+
+// Naye khaane (upgrade SQL) abhi database mein hain ya nahi
+let hasNewCols = true;
+function isMissingColumn(err) {
+  const m = ((err && err.message) || '').toLowerCase();
+  return (err && (err.code === 'PGRST204' || err.code === '42703')) || m.includes('column');
+}
+
 // ---------- Chhote helper functions ----------
 function $(id) { return document.getElementById(id); }
 
@@ -77,6 +90,7 @@ let profile = null;
 let loginRole = 'staff';
 let isAdmin = false;
 let repairs = [];
+let justUpdated = null;
 
 // Dropdowns bharo
 (function fillSelects() {
@@ -85,7 +99,47 @@ let repairs = [];
     '<option value="active">Sab chalu (Delivered/Returned chhodke)</option>' +
     '<option value="all">Sab repairs</option>' +
     STATUSES.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('');
+  const wOpts = WARRANTY_OPTIONS.map(function (w) { return '<option value="' + w[0] + '">' + w[1] + '</option>'; }).join('');
+  $('rWarranty').innerHTML = wOpts;
+  $('eWarranty').innerHTML = wOpts;
+  $('rWarranty').value = '30';
+  renderChips('rAcc', ACCESSORIES, []);
+  renderChips('rCond', CONDITIONS, []);
 })();
+
+// ---------- Checkbox chips ----------
+function renderChips(boxId, items, selected) {
+  $(boxId).innerHTML = items.map(function (it) {
+    const on = selected.indexOf(it) !== -1;
+    return '<label class="chip"><input type="checkbox" value="' + esc(it) + '"' + (on ? ' checked' : '') + '><span>' + esc(it) + '</span></label>';
+  }).join('');
+}
+
+function readChips(boxId) {
+  return Array.prototype.slice.call($(boxId).querySelectorAll('input:checked')).map(function (i) { return i.value; });
+}
+
+function cleanImei(v) { return String(v || '').replace(/\D/g, ''); }
+
+function warrantyLabel(days) {
+  const w = WARRANTY_OPTIONS.find(function (x) { return x[0] === Number(days); });
+  return w ? w[1] : (days ? days + ' din' : '');
+}
+
+function addDays(dateStr, n) {
+  const p = String(dateStr).split('-').map(Number);
+  const d = new Date(p[0], p[1] - 1, p[2] + Number(n));
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+// Bill ka hisaab: final charge (ya estimate) - advance
+function balanceOf(r) {
+  const total = r.final_charge != null ? Number(r.final_charge) : (r.estimated_charge != null ? Number(r.estimated_charge) : null);
+  if (total == null) return null;
+  return Math.max(0, total - Number(r.advance_paid || 0));
+}
+
+function trackUrl(mobile) { return TRACK_LINK + '?m=' + encodeURIComponent(mobile || ''); }
 
 // ==========================================================
 //  LOGIN / LOGOUT
@@ -290,6 +344,16 @@ $('repairForm').addEventListener('submit', async function (e) {
     toast('Please enter required information.', 'err');
     return;
   }
+  const imei = cleanImei($('rImei').value);
+  if (imei && !/^\d{14,16}$/.test(imei)) {
+    toast('IMEI 15 digit ka hota hai. Khali chhod do ya sahi daalo.', 'err');
+    return;
+  }
+  const advance = $('rAdvance').value;
+  if (advance !== '' && Number(advance) < 0) {
+    toast('Please enter required information.', 'err');
+    return;
+  }
 
   $('addBtn').disabled = true;
   try {
@@ -298,7 +362,7 @@ $('repairForm').addEventListener('submit', async function (e) {
     const cust = Array.isArray(cdata) ? cdata[0] : cdata;
     if (!cust || !cust.out_customer_id) throw { message: 'customer error' };
 
-    const { data: rep, error: rerr } = await db.from('repairs').insert({
+    const base = {
       customer_id: cust.out_customer_id,
       device_model: model,
       problem: $('rProblem').value.trim() || null,
@@ -308,13 +372,33 @@ $('repairForm').addEventListener('submit', async function (e) {
       estimated_delivery: $('rDelivery').value || null,
       public_note: $('rPublic').value.trim() || null,
       internal_note: $('rInternal').value.trim() || null
-    }).select('repair_code').single();
-    if (rerr) throw rerr;
+    };
+    const extra = {
+      imei: imei || null,
+      lock_code: $('rLock').value.trim() || null,
+      accessories: readChips('rAcc'),
+      condition_checks: readChips('rCond'),
+      advance_paid: advance === '' ? 0 : Number(advance),
+      warranty_days: Number($('rWarranty').value) || null
+    };
 
-    toast('Repair added. Repair ID: ' + rep.repair_code, 'ok');
+    let res = await db.from('repairs').insert(Object.assign({}, base, hasNewCols ? extra : {})).select('repair_code').single();
+    if (res.error && hasNewCols && isMissingColumn(res.error)) {
+      // Upgrade SQL abhi nahi chala — purane tareeke se save karo
+      hasNewCols = false;
+      res = await db.from('repairs').insert(base).select('repair_code').single();
+      if (!res.error) toast('Repair save hua, lekin IMEI/advance/warranty save nahi hue: pehle upgrade SQL chalana hai.', 'err');
+    }
+    if (res.error) throw res.error;
+    const rep = res.data;
+
+    if (hasNewCols) toast('Repair added. Repair ID: ' + rep.repair_code, 'ok');
     showAdded(rep.repair_code, cust.out_name || name, mobile, model);
 
-    ['rMobile', 'rName', 'rModel', 'rProblem', 'rCharge', 'rDelivery', 'rPublic', 'rInternal'].forEach(function (id) { $(id).value = ''; });
+    ['rMobile', 'rName', 'rModel', 'rProblem', 'rCharge', 'rDelivery', 'rPublic', 'rInternal', 'rImei', 'rLock', 'rAdvance'].forEach(function (id) { $(id).value = ''; });
+    renderChips('rAcc', ACCESSORIES, []);
+    renderChips('rCond', CONDITIONS, []);
+    $('rWarranty').value = '30';
     $('rName').readOnly = false;
     $('rHint').textContent = '';
     $('rStatus').value = 'Received';
@@ -330,7 +414,7 @@ $('repairForm').addEventListener('submit', async function (e) {
 function showAdded(code, name, mobile, model) {
   const msg = 'Namaste ' + name + ', aapka ' + model + ' Hello Brothers Smart Store me receive ho gaya hai.\n' +
     'Repair ID: ' + code + '\n' +
-    'Status dekhne ke liye apna mobile number yahan daalein: ' + TRACK_LINK;
+    'Status dekhne ke liye: ' + trackUrl(mobile);
   const wa = 'https://wa.me/91' + mobile + '?text=' + encodeURIComponent(msg);
   const box = $('addedBox');
   box.innerHTML =
@@ -388,6 +472,12 @@ async function loadRepairs() {
   if (error) { toast(errorMessage(error), 'err'); return; }
 
   let list = data || [];
+  // Upgrade SQL chala hai ya nahi, ye pehli row se pata chal jata hai
+  if (list.length) {
+    const had = hasNewCols;
+    hasNewCols = Object.prototype.hasOwnProperty.call(list[0], 'advance_paid');
+    if (had && !hasNewCols) toast('Naye features (IMEI, advance, warranty) ke liye pehle upgrade SQL chalana hai.', 'err');
+  }
   if (textSearch) {
     const t = term.toLowerCase();
     list = list.filter(function (r) {
@@ -418,8 +508,20 @@ function renderList() {
     h += '<div><span>Customer:</span> <b>' + esc(c.name) + '</b> &bull; <a href="tel:' + esc(c.mobile) + '">' + esc(c.mobile) + '</a></div>';
     if (r.problem) h += '<div><span>Problem:</span> ' + esc(r.problem) + '</div>';
     h += '<div><span>Received:</span> ' + esc(fmtDate(r.received_date)) + ' &bull; <span>Updated:</span> ' + esc(fmtDateTime(r.updated_at)) + '</div>';
+    if (r.imei) h += '<div><span>IMEI:</span> ' + esc(r.imei) + '</div>';
+    if (r.lock_code) h += '<div><span>Lock:</span> <button type="button" class="lock-btn" data-act="lock" data-code="' + esc(r.lock_code) + '">Dekhne ke liye dabao</button></div>';
+    if (r.accessories && r.accessories.length) h += '<div><span>Saath aaya:</span> ' + esc(r.accessories.join(', ')) + '</div>';
+    if (r.condition_checks && r.condition_checks.length) h += '<div><span>Halat:</span> ' + esc(r.condition_checks.join(', ')) + '</div>';
     if (r.estimated_charge != null) h += '<div><span>Estimate:</span> <b>' + money(r.estimated_charge) + '</b></div>';
+    if (r.final_charge != null) h += '<div><span>Final:</span> <b>' + money(r.final_charge) + '</b></div>';
+    if (Number(r.advance_paid) > 0) h += '<div><span>Advance:</span> ' + money(r.advance_paid) + '</div>';
+    const bal = balanceOf(r);
+    if (bal != null && r.status !== 'Delivered') h += '<div><span>Baaki lena hai:</span> <b class="due">' + money(bal) + '</b></div>';
     if (r.estimated_delivery) h += '<div><span>Delivery:</span> ' + esc(fmtDate(r.estimated_delivery)) + '</div>';
+    if (r.warranty_days) {
+      h += '<div><span>Warranty:</span> ' + esc(warrantyLabel(r.warranty_days)) +
+        (r.delivered_on ? ' &bull; ' + esc(fmtDate(addDays(r.delivered_on, r.warranty_days))) + ' tak' : '') + '</div>';
+    }
     if (r.public_note) h += '<div><span>Customer note:</span> ' + esc(r.public_note) + '</div>';
     if (r.internal_note) h += '<div><span>Internal note:</span> ' + esc(r.internal_note) + '</div>';
     h += '</div>';
@@ -433,9 +535,14 @@ function renderList() {
     h += '</select>';
     h += '<button type="button" class="btn btn-green" data-act="status" data-id="' + esc(r.id) + '">Update Status</button>';
     h += '</div>';
+    if (justUpdated === r.id) {
+      h += '<div class="notify-box">Status badal gaya. Customer ko batana hai?' +
+        '<button type="button" class="btn btn-green" data-act="notify" data-id="' + esc(r.id) + '">WhatsApp par batao</button></div>';
+    }
 
     h += '<div class="rep-actions">';
     h += '<button type="button" class="btn btn-ghost" data-act="history" data-id="' + esc(r.id) + '">Timeline</button>';
+    h += '<button type="button" class="btn btn-ghost" data-act="notify" data-id="' + esc(r.id) + '">Status WhatsApp</button>';
     h += '<button type="button" class="btn btn-ghost" data-act="cust" data-mobile="' + esc(c.mobile) + '">Customer History</button>';
     h += '<button type="button" class="btn btn-ghost" data-act="print" data-id="' + esc(r.id) + '">Print Jobsheet</button>';
     h += '<button type="button" class="btn btn-ghost" data-act="wa" data-id="' + esc(r.id) + '">WhatsApp Jobsheet</button>';
@@ -462,6 +569,12 @@ $('repairList').addEventListener('click', function (e) {
     loadRepairs();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+  if (act === 'lock') {
+    e.target.textContent = e.target.getAttribute('data-code');
+    e.target.removeAttribute('data-act');
+    e.target.classList.add('shown');
+  }
+  if (act === 'notify') notifyStatus(id);
   if (act === 'print') printJobsheet(id);
   if (act === 'wa') sendJobsheet(id, 'wa');
   if (act === 'sms') sendJobsheet(id, 'sms');
@@ -485,11 +598,19 @@ function jobsheetText(r, plain) {
     'Date: ' + fmtDate(r.received_date) + '\n' +
     'Customer: ' + (c.name || '') + ' (' + (c.mobile || '') + ')\n' +
     'Phone: ' + r.device_model + '\n';
+  if (r.imei) t += 'IMEI: ' + r.imei + '\n';
   if (r.problem) t += 'Problem: ' + r.problem + '\n';
+  if (r.accessories && r.accessories.length) t += 'Saath aaya: ' + r.accessories.join(', ') + '\n';
+  if (r.condition_checks && r.condition_checks.length) t += 'Phone ki halat: ' + r.condition_checks.join(', ') + '\n';
   t += 'Status: ' + r.status + '\n';
   if (r.estimated_charge != null) t += 'Estimate: ' + money(r.estimated_charge) + '\n';
+  if (r.final_charge != null) t += 'Final Charge: ' + money(r.final_charge) + '\n';
+  if (Number(r.advance_paid) > 0) t += 'Advance diya: ' + money(r.advance_paid) + '\n';
+  const bal = balanceOf(r);
+  if (bal != null && Number(r.advance_paid) > 0) t += 'Baaki: ' + money(bal) + '\n';
   if (r.estimated_delivery) t += 'Est. Delivery: ' + fmtDate(r.estimated_delivery) + '\n';
-  t += '\nStatus dekhne ke liye: ' + TRACK_LINK + '\n' + SHOP.name + ' | ' + SHOP.phone;
+  if (r.warranty_days) t += 'Repair Warranty: ' + warrantyLabel(r.warranty_days) + ' (delivery se)\n';
+  t += '\nStatus dekhne ke liye: ' + trackUrl(c.mobile) + '\n' + SHOP.name + ' | ' + SHOP.phone;
   return plain ? t.replace(/\*/g, '') : t;
 }
 
@@ -511,7 +632,7 @@ function jobsheetHtml(r) {
     'table{width:100%;border-collapse:collapse}td{border:1px solid #444;padding:6px 8px;vertical-align:top}td.l{width:36%;font-weight:bold;background:#f2f2f2}' +
     '.terms{margin-top:10px;font-size:11px}.terms div{margin-top:2px}' +
     '.sig{display:flex;justify-content:space-between;margin-top:36px;font-size:12px}.sig div{border-top:1px solid #000;padding-top:4px;width:42%;text-align:center}' +
-    '.trk{margin-top:12px;text-align:center;font-size:11px}' +
+    '.trk{margin-top:12px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:11px;text-align:left}.trk img{width:84px;height:84px;image-rendering:pixelated}' +
     '</style></head><body>' +
     '<div class="hd"><div class="lgw"><img class="lg" src="' + esc(location.origin + '/logo.png') + '" alt=""></div>' +
     '<div class="hx"><h1>Hello Brothers Smart Store</h1><div class="tg">Mobile Repair &bull; Chip-Level &bull; Accessories</div>' +
@@ -520,18 +641,40 @@ function jobsheetHtml(r) {
     '<div class="code"><span>Repair ID: ' + esc(r.repair_code) + '</span><span>Date: ' + esc(fmtDate(r.received_date)) + '</span></div>' +
     '<table>' +
     row('Customer', c.name) + row('Mobile', c.mobile) + row('Phone Model', r.device_model) +
-    row('Problem', r.problem) + row('Status', r.status) +
+    row('IMEI', r.imei) +
+    row('Problem', r.problem) +
+    row('Saath Aaya', (r.accessories || []).join(', ')) +
+    row('Phone ki Halat', (r.condition_checks || []).join(', ')) +
+    row('Status', r.status) +
     (r.estimated_charge != null ? row('Estimated Charges', money(r.estimated_charge)) : '') +
+    (r.final_charge != null ? row('Final Charge', money(r.final_charge)) : '') +
+    (Number(r.advance_paid) > 0 ? row('Advance Diya', money(r.advance_paid)) : '') +
+    (Number(r.advance_paid) > 0 && balanceOf(r) != null ? row('Baaki Payment', money(balanceOf(r))) : '') +
     (r.estimated_delivery ? row('Est. Delivery', fmtDate(r.estimated_delivery)) : '') +
+    (r.warranty_days ? row('Repair Warranty', warrantyLabel(r.warranty_days) + ' (delivery ki date se, sirf repair kiye part par)') : '') +
     row('Note', r.public_note) +
     '</table>' +
     '<div class="terms"><b>Dhyan dein:</b>' +
     '<div>1. Phone lene ke liye ye Jobsheet saath layein.</div>' +
     '<div>2. Repair ke baad final charges badal sakte hain, pehle bataya jayega.</div>' +
-    '<div>3. Phone ka data/backup customer ki zimmedari hai.</div></div>' +
+    '<div>3. Phone ka data/backup customer ki zimmedari hai.</div>' +
+    '<div>4. Pani lage / tute hue phone mein repair ke baad bhi doosri kharabi aa sakti hai.</div>' +
+    '<div>5. Ready hone ke 30 din tak phone na lene par shop zimmedar nahi.</div></div>' +
     '<div class="sig"><div>Customer Signature</div><div>Authorised Signature</div></div>' +
-    '<div class="trk">Repair status dekhein: ' + esc(TRACK_LINK) + '</div>' +
+    '<div class="trk">' + qrImg(trackUrl(c.mobile)) +
+    '<div>Ye QR scan karke apne phone ka status dekhein<br>' + esc(TRACK_LINK) + '</div></div>' +
     '</body></html>';
+}
+
+// QR code (track page + customer ka mobile pehle se bhara hua)
+function qrImg(text) {
+  if (typeof window.qrcode !== 'function') return '';
+  try {
+    const q = window.qrcode(0, 'M');
+    q.addData(text);
+    q.make();
+    return '<img alt="QR" src="' + q.createDataURL(4, 2) + '">';
+  } catch (e) { return ''; }
 }
 
 function printJobsheet(id) {
@@ -589,7 +732,55 @@ async function updateStatus(id) {
     return;
   }
   toast('Status updated successfully.', 'ok');
+  justUpdated = id;
   loadRepairs();
+}
+
+// ==========================================================
+//  STATUS KA WHATSAPP MESSAGE (har status ka alag)
+// ==========================================================
+function statusMessage(r) {
+  const c = r.customers || {};
+  const first = String(c.name || '').split(' ')[0];
+  const bal = balanceOf(r);
+  let t = 'Namaste ' + first + ' ji,\n';
+  switch (r.status) {
+    case 'Received':
+      t += 'Aapka ' + r.device_model + ' humne receive kar liya hai (Repair ID: ' + r.repair_code + ').'; break;
+    case 'Diagnosing':
+      t += 'Aapke ' + r.device_model + ' ki jaanch chal rahi hai. Kharabi pata chalte hi charges bata denge.'; break;
+    case 'Repair in Progress':
+      t += 'Aapke ' + r.device_model + ' ki repair shuru ho gayi hai.';
+      if (r.estimated_delivery) t += ' Andaazan ' + fmtDate(r.estimated_delivery) + ' tak ready ho jayega.';
+      break;
+    case 'Waiting for Part':
+      t += 'Aapke ' + r.device_model + ' ka part mangwaya gaya hai. Part aate hi repair karke batayenge.'; break;
+    case 'Ready for Pickup':
+      t += 'Khushkhabri! Aapka ' + r.device_model + ' repair hokar ready hai. Shop se le sakte hain.';
+      if (bal != null && bal > 0) t += '\nBaaki payment: ' + money(bal);
+      t += '\nJobsheet / Repair ID (' + r.repair_code + ') saath layein.';
+      break;
+    case 'Delivered':
+      t += 'Aapka ' + r.device_model + ' deliver ho gaya. Hello Brothers par bharosa karne ke liye dhanyavaad!';
+      if (r.warranty_days) t += '\nRepair warranty: ' + warrantyLabel(r.warranty_days) + '.';
+      break;
+    case 'Returned':
+      t += 'Aapka ' + r.device_model + ' bina repair ke wapas tayyar hai. Shop se le sakte hain.';
+      if (r.public_note) t += '\nWajah: ' + r.public_note;
+      break;
+    default:
+      t += 'Aapke ' + r.device_model + ' ka status: ' + r.status;
+  }
+  t += '\n\nStatus dekhein: ' + trackUrl(c.mobile) + '\n' + SHOP.name + ' | ' + SHOP.phone;
+  return t;
+}
+
+function notifyStatus(id) {
+  const r = repairs.find(function (x) { return x.id === id; });
+  if (!r) return;
+  const c = r.customers || {};
+  window.open('https://wa.me/91' + encodeURIComponent(c.mobile || '') + '?text=' + encodeURIComponent(statusMessage(r)), '_blank', 'noopener');
+  if (justUpdated === id) { justUpdated = null; renderList(); }
 }
 
 // ==========================================================
@@ -630,6 +821,13 @@ function openEdit(id) {
   $('eProblem').value = r.problem || '';
   $('ePublic').value = r.public_note || '';
   $('eInternal').value = r.internal_note || '';
+  $('eImei').value = r.imei || '';
+  $('eLock').value = r.lock_code || '';
+  $('eAdvance').value = r.advance_paid != null ? r.advance_paid : '';
+  $('eFinal').value = r.final_charge == null ? '' : r.final_charge;
+  $('eWarranty').value = String(r.warranty_days || 0);
+  renderChips('eAcc', ACCESSORIES, r.accessories || []);
+  renderChips('eCond', CONDITIONS, r.condition_checks || []);
   $('editModal').classList.remove('hidden');
 }
 
@@ -653,7 +851,13 @@ $('editForm').addEventListener('submit', async function (e) {
     return;
   }
 
-  const r1 = await db.from('repairs').update({
+  const imei = cleanImei($('eImei').value);
+  if (imei && !/^\d{14,16}$/.test(imei)) { toast('IMEI 15 digit ka hota hai.', 'err'); return; }
+  const adv = $('eAdvance').value;
+  const fin = $('eFinal').value;
+  if ((adv !== '' && Number(adv) < 0) || (fin !== '' && Number(fin) < 0)) { toast('Please enter required information.', 'err'); return; }
+
+  const upd = {
     device_model: model,
     problem: $('eProblem').value.trim() || null,
     received_date: date,
@@ -661,7 +865,19 @@ $('editForm').addEventListener('submit', async function (e) {
     estimated_delivery: $('eDelivery').value || null,
     public_note: $('ePublic').value.trim() || null,
     internal_note: $('eInternal').value.trim() || null
-  }).eq('id', id).select('id');
+  };
+  if (hasNewCols) {
+    Object.assign(upd, {
+      imei: imei || null,
+      lock_code: $('eLock').value.trim() || null,
+      advance_paid: adv === '' ? 0 : Number(adv),
+      final_charge: fin === '' ? null : Number(fin),
+      warranty_days: Number($('eWarranty').value) || null,
+      accessories: readChips('eAcc'),
+      condition_checks: readChips('eCond')
+    });
+  }
+  const r1 = await db.from('repairs').update(upd).eq('id', id).select('id');
   if (r1.error) { toast(errorMessage(r1.error), 'err'); return; }
   if (!r1.data || r1.data.length === 0) { toast("You don't have permission to perform this action.", 'err'); return; }
 
@@ -703,11 +919,13 @@ $('exportBtn').addEventListener('click', function () {
   if (!isAdmin) { toast("You don't have permission to perform this action.", 'err'); return; }
   if (repairs.length === 0) { toast('Download karne ke liye koi repair nahi hai.', 'err'); return; }
 
-  const head = ['Repair ID', 'Mobile', 'Customer', 'Phone Model', 'Problem', 'Status', 'Received', 'Est. Charge', 'Est. Delivery', 'Customer Note', 'Internal Note', 'Last Updated'];
+  const head = ['Repair ID', 'Mobile', 'Customer', 'Phone Model', 'IMEI', 'Problem', 'Status', 'Received', 'Est. Charge', 'Final Charge', 'Advance', 'Baaki', 'Est. Delivery', 'Delivered On', 'Warranty (din)', 'Saath Aaya', 'Halat', 'Customer Note', 'Internal Note', 'Last Updated'];
   const rows = repairs.map(function (r) {
     const c = r.customers || {};
-    return [r.repair_code, c.mobile, c.name, r.device_model, r.problem, r.status, fmtDate(r.received_date),
-      r.estimated_charge, r.estimated_delivery ? fmtDate(r.estimated_delivery) : '', r.public_note, r.internal_note, fmtDateTime(r.updated_at)]
+    return [r.repair_code, c.mobile, c.name, r.device_model, r.imei, r.problem, r.status, fmtDate(r.received_date),
+      r.estimated_charge, r.final_charge, r.advance_paid, balanceOf(r), r.estimated_delivery ? fmtDate(r.estimated_delivery) : '',
+      r.delivered_on ? fmtDate(r.delivered_on) : '', r.warranty_days, (r.accessories || []).join('; '), (r.condition_checks || []).join('; '),
+      r.public_note, r.internal_note, fmtDateTime(r.updated_at)]
       .map(csvCell).join(',');
   });
   const csv = '\uFEFF' + [head.map(csvCell).join(',')].concat(rows).join('\r\n');

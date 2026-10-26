@@ -96,6 +96,32 @@
           </div>
           <label for="rProblem">Problem (kya kharabi hai)</label>
           <input id="rProblem" type="text" autocomplete="off" placeholder="Jaise: Screen toot gayi">
+
+          <div class="grid2">
+            <div>
+              <label for="rImei">IMEI (optional, *#06# dial karke)</label>
+              <input id="rImei" type="text" inputmode="numeric" maxlength="16" autocomplete="off" placeholder="15 digit">
+            </div>
+            <div>
+              <label for="rLock">Lock / Pattern / Passcode (sirf team)</label>
+              <input id="rLock" type="text" autocomplete="off" maxlength="40" placeholder="Jaise: 1234 ya L-shape 1-4-7-8-9">
+            </div>
+            <div>
+              <label for="rAdvance">Advance Liya (₹)</label>
+              <input id="rAdvance" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0">
+            </div>
+            <div>
+              <label for="rWarranty">Repair Warranty</label>
+              <select id="rWarranty"></select>
+            </div>
+          </div>
+
+          <label>Phone ke saath kya aaya</label>
+          <div id="rAcc" class="chips"></div>
+
+          <label>Phone ki halat (receive karte waqt)</label>
+          <div id="rCond" class="chips"></div>
+
           <label for="rPublic">Customer ko dikhne wala note (optional)</label>
           <textarea id="rPublic" rows="2" placeholder="Ye customer ko track page par dikhega"></textarea>
           <label for="rInternal">Internal note (sirf team ko dikhega)</label>
@@ -142,7 +168,16 @@
           <div><label for="eCharge">Estimated Charges (₹)</label><input id="eCharge" type="number" inputmode="decimal" min="0" step="0.01"></div>
           <div><label for="eDelivery">Estimated Delivery Date</label><input id="eDelivery" type="date"></div>
           <div><label for="eProblem">Problem</label><input id="eProblem" type="text"></div>
+          <div><label for="eImei">IMEI</label><input id="eImei" type="text" inputmode="numeric" maxlength="16"></div>
+          <div><label for="eLock">Lock / Pattern</label><input id="eLock" type="text" maxlength="40"></div>
+          <div><label for="eAdvance">Advance Liya (₹)</label><input id="eAdvance" type="number" inputmode="decimal" min="0" step="0.01"></div>
+          <div><label for="eFinal">Final Charge (₹)</label><input id="eFinal" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Delivery par asli bill"></div>
+          <div><label for="eWarranty">Repair Warranty</label><select id="eWarranty"></select></div>
         </div>
+        <label>Phone ke saath kya aaya</label>
+        <div id="eAcc" class="chips"></div>
+        <label>Phone ki halat</label>
+        <div id="eCond" class="chips"></div>
         <label for="ePublic">Customer ko dikhne wala note</label>
         <textarea id="ePublic" rows="2"></textarea>
         <label for="eInternal">Internal note (sirf team)</label>
@@ -159,6 +194,7 @@
 
   <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
   <script src="repairs-admin.js"></script>
 </body>
 </html>

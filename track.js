@@ -44,6 +44,7 @@ const T = {
     lastUpdated: 'Last Updated',
     estDelivery: 'Estimated Delivery',
     noteRow: 'Note',
+    warrantyTill: 'Repair Warranty till',
     progress: 'REPAIR PROGRESS',
     st: {
       'Received': 'Received',
@@ -92,6 +93,7 @@ const T = {
     lastUpdated: 'आखिरी अपडेट',
     estDelivery: 'अनुमानित डिलीवरी',
     noteRow: 'नोट',
+    warrantyTill: 'रिपेयर वारंटी कब तक',
     progress: 'रिपेयर की प्रगति',
     st: {
       'Received': 'फोन प्राप्त हुआ',
@@ -140,6 +142,7 @@ const T = {
     lastUpdated: 'ਆਖ਼ਰੀ ਅਪਡੇਟ',
     estDelivery: 'ਅਨੁਮਾਨਿਤ ਡਿਲੀਵਰੀ',
     noteRow: 'ਨੋਟ',
+    warrantyTill: 'ਰਿਪੇਅਰ ਵਾਰੰਟੀ ਕਦੋਂ ਤੱਕ',
     progress: 'ਰਿਪੇਅਰ ਦੀ ਪ੍ਰਗਤੀ',
     st: {
       'Received': 'ਫ਼ੋਨ ਪ੍ਰਾਪਤ ਹੋਇਆ',
@@ -346,6 +349,7 @@ function card(r, open) {
   h += row(t('lastUpdated'), fmtDateTime(r.updated_at));
   if (r.estimated_delivery) h += row(t('estDelivery'), fmtDate(r.estimated_delivery));
   if (r.public_note) h += row(t('noteRow'), r.public_note);
+  if (r.warranty_until) h += row(t('warrantyTill'), fmtDate(r.warranty_until));
   h += '</div>';
 
   if (r.status === 'Returned') {

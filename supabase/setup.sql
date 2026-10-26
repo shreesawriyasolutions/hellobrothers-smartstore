@@ -380,3 +380,9 @@ create policy bills_files_delete_admin on storage.objects for delete to authenti
 --     update public.profiles set role = 'admin', can_view = true
 --     where id = (select id from auth.users where email = 'aapka@email.com');
 -- ==========================================================
+
+-- ==========================================================
+--  NAYA PROJECT BANA RAHE HO? Is file ke baad
+--  supabase/upgrade-2026-10-intake-payment-warranty.sql bhi chalao
+--  (IMEI, lock code, checklist, advance, warranty ke liye).
+-- ==========================================================
