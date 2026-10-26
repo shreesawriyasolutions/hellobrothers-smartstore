@@ -1,7 +1,7 @@
 # Hello Brothers Smart Store
 
 Website for Hello Brothers Smart Store, M.G. Road, Opp. Shri Ram Studio, Safidon, Jind (Haryana).
-Phone / WhatsApp: +91 94684 51460, +91 86850 76900
+Phone / WhatsApp: +91 94684 51450, +91 86850 76900
 
 - `index.html` – home page; `track.html` – customer enters mobile number and sees repair status
 - `repairs-admin.html` – staff/admin login: add customer + phone repair, update status

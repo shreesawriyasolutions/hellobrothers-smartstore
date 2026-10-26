@@ -475,7 +475,7 @@ $('repairList').addEventListener('click', function (e) {
 const SHOP = {
   name: 'HELLO BROTHERS SMART STORE',
   addr: 'M.G. Road, Opp. Shri Ram Studio, Safidon, Jind, Haryana',
-  phone: '+91 94684 51460'
+  phone: '+91 94684 51450'
 };
 
 function jobsheetText(r, plain) {
