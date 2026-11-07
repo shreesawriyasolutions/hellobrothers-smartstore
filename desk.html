@@ -98,6 +98,19 @@ button{cursor:pointer}
 .lg-card .btn.gold{background:#ffc400;color:#000}
 .lg-err{margin:0;color:#ff7a6b;font-size:14px}
 .topbar .acct{margin-left:8px;flex:none}
+.calc{margin:0;font-size:13px;color:var(--muted)}
+.calc b,.earnbox b{color:var(--gold)}
+.earnbox{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--gold-soft);border:1px solid var(--gold-soft);font-size:14px}
+.earnbox .eb-t{font-weight:700;margin-bottom:2px}
+.earnbox .eb-h{color:var(--muted);font-size:12.5px;margin-top:4px}
+.ledger{display:grid;gap:8px}
+.lrow{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:inherit}
+.lrow .l1{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.lrow .l1 .amt{color:var(--green);font-weight:700;white-space:nowrap}
+.lrow .l2{font-size:13px;color:var(--muted);margin-top:3px}
+.lrow .l3{font-size:12px;color:var(--muted)}
+.lrow .x{border:0;background:none;color:var(--red);font-size:18px;cursor:pointer;padding:0 4px}
+.quick a.qa{text-decoration:none;color:inherit}
 .icon-btn{border:0;background:var(--surface-2);width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:20px;line-height:1;color:var(--fg)}
 .banner{margin:12px 0 0;padding:10px 14px;border-radius:10px;font-size:14px;background:var(--amber-soft);color:var(--amber);border:1px solid var(--amber-soft)}
 .banner.err{background:var(--red-soft);color:var(--red)}
@@ -116,10 +129,10 @@ button{cursor:pointer}
 .kpi.hero .v{color:#ffc400}
 
 .quick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
-.quick button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);font-size:13px;font-weight:500;color:var(--fg)}
-.quick button span{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--gold-soft);color:var(--gold)}
-.quick button svg{width:21px;height:21px}
-.quick button:hover{border-color:var(--gold)}
+.quick button,.quick a.qa{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);font-size:13px;font-weight:500;color:var(--fg)}
+.quick button span,.quick a.qa span{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--gold-soft);color:var(--gold)}
+.quick button svg,.quick a.qa svg{width:21px;height:21px}
+.quick button:hover,.quick a.qa:hover{border-color:var(--gold)}
 
 .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
 .search{flex:1 1 220px;min-width:0;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:0 14px}
@@ -304,11 +317,17 @@ const ICON = {
   bills:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2.5h14v19l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>',
   staff:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.3-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.8a3.3 3.3 0 0 1 0 6.4M18.5 14.8c1.7.7 2.8 2.4 3 5.2"/></svg>',
   search:'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg>',
+  kamai:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="13" rx="2.5"/><path d="M16 12.5h2.5M2.5 10h19M6 6V4.5h12V6"/></svg>',
   dl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-5-5 5 5 5-5M4 20h16"/></svg>'
 };
-const VIEWS = [
+const VIEWS_ADMIN = [
   {k:"home",l:"Home"},{k:"status",l:"Status"},{k:"sales",l:"Sales"},{k:"bills",l:"Bills"},{k:"staff",l:"Staff"}
 ];
+const VIEWS_STAFF = [ {k:"home",l:"Home"},{k:"status",l:"Jobs"},{k:"kamai",l:"Meri Kamai"} ];
+const VIEWS_ALL = [...VIEWS_ADMIN, VIEWS_STAFF[2]];
+const isAdmin = () => S.role==="admin";
+const curViews = () => isAdmin() ? VIEWS_ADMIN : S.role==="staff" ? VIEWS_STAFF : VIEWS_ADMIN;
+const PAY_TYPES = [{k:"commission",l:"Commission (kamai ka %)"},{k:"salary",l:"Fixed salary"}];
 const STATUSES = [
   {k:"received",l:"Received"},{k:"repair",l:"Repair me"},{k:"waiting",l:"Parts wait"},
   {k:"ready",l:"Ready"},{k:"delivered",l:"Delivered"},{k:"cancelled",l:"Cancelled"}
@@ -321,7 +340,7 @@ const STAFF_ST = [{k:"active",l:"Active"},{k:"leave",l:"Chhutti par"},{k:"left",
 const COLS = ["jobs","sales","bills","staff"];
 
 const S = { data:{jobs:[],sales:[],bills:[],staff:[]}, loaded:{}, db:null, mode:"loading", err:"", canWrite:true, user:null, role:"",
-  view:"home", jobFilter:"active", jobQ:"", period:"month", billQ:"", billFilter:"all", staffQ:"" };
+  me:null, kPeriod:"month", view:"home", jobFilter:"active", jobQ:"", period:"month", billQ:"", billFilter:"all", staffQ:"" };
 
 /* ---------- helpers ---------- */
 const $ = (s,r=document)=>r.querySelector(s);
@@ -341,6 +360,52 @@ const stLabel = k => (STATUSES.find(s=>s.k===k)||{l:k}).l;
 const pill = (k,l) => `<span class="pill p-${esc(k)}">${esc(l)}</span>`;
 const initials = n => String(n||"?").trim().split(/\s+/).slice(0,2).map(w=>w[0]).join("").toUpperCase();
 const staffName = id => (S.data.staff.find(s=>s.id===id)||{}).name || "";
+const hasVal = v => v!==undefined && v!==null && v!=="";
+function jobEarn(j){
+  const s=S.data.staff.find(x=>x.id===j.assignedTo);
+  if(!s || (s.pay||"salary")!=="commission") return null;
+  const amt=num(hasVal(j.finalAmt)?j.finalAmt:j.estimate), parts=num(j.partsCost);
+  const profit=Math.max(0,amt-parts);
+  const pct=num(hasVal(j.commPct)?j.commPct:(hasVal(s.commPct)?s.commPct:50));
+  return {staff:s, amt, parts, profit, pct, earn:Math.round(profit*pct/100), done:j.status==="delivered", final:hasVal(j.finalAmt)};
+}
+const deliveredAt = j => j.deliveredAt || ((j.history||[]).filter(h=>h.status==="delivered").map(h=>h.at).pop()) || j.updatedAt || 0;
+function kRange(p){
+  const d=new Date(); const y=d.getFullYear(), m=d.getMonth();
+  if(p==="month") return [new Date(y,m,1).getTime(), new Date(y,m+1,1).getTime()];
+  if(p==="last") return [new Date(y,m-1,1).getTime(), new Date(y,m,1).getTime()];
+  return [0, Infinity];
+}
+const K_PERIODS=[{k:"month",l:"Is mahine"},{k:"last",l:"Pichhla mahina"},{k:"all",l:"Shuru se"}];
+function ledger(s, p){
+  const [a,b]=kRange(p);
+  const mine=S.data.jobs.filter(j=>j.assignedTo===s.id);
+  const doneAll=mine.filter(j=>j.status==="delivered").map(j=>({j,e:jobEarn(j),at:deliveredAt(j)})).filter(x=>x.e);
+  const done=doneAll.filter(x=>x.at>=a&&x.at<b).sort((x,y)=>y.at-x.at);
+  const pays=(s.payouts||[]).map((x,i)=>({...x,i})).filter(x=>{ const t=new Date((x.date||"1970-01-01")+"T00:00:00").getTime(); return t>=a&&t<b; }).sort((x,y)=>String(y.date).localeCompare(String(x.date)));
+  const earnAll=sum(doneAll,x=>x.e.earn), paidAll=sum(s.payouts||[],"amt");
+  const active=mine.filter(j=>!["delivered","cancelled"].includes(j.status));
+  return { done, pays, earned:sum(done,x=>x.e.earn), paid:sum(pays,"amt"), balance:earnAll-paidAll, active,
+    pending:sum(active.map(jobEarn).filter(Boolean),"earn") };
+}
+const calcLine = e => `${inr(e.amt)} − ${inr(e.parts)} = ${inr(e.profit)} × ${e.pct}% = <b>${inr(e.earn)}</b>`;
+function ledgerHtml(s, admin){
+  if((s.pay||"salary")!=="commission") return `<div class="empty">${esc(s.name)} fixed salary par hai${num(s.salary)?` (${inr(s.salary)}/mahina)`:""}. Commission ka hisab sirf commission wale staff ka banta hai.</div>`;
+  const L=ledger(s,S.kPeriod);
+  return `
+  <div class="chips" style="margin:4px 0 12px">${K_PERIODS.map(c=>`<button class="chip ${S.kPeriod===c.k?"on":""}" data-act="kPeriod" data-p="${c.k}" data-sid="${esc(admin?s.id:"")}">${c.l}</button>`).join("")}</div>
+  <div class="kpis">
+    <div class="kpi hero"><div class="label">Kamai (${esc(K_PERIODS.find(x=>x.k===S.kPeriod).l)})</div><div class="v num">${inr(L.earned)}</div><div class="s">${L.done.length} jobs delivered · ${num(hasVal(s.commPct)?s.commPct:50)}% commission</div></div>
+    <div class="kpi"><div class="label">Payment mila</div><div class="v num">${inr(L.paid)}</div><div class="s">${L.pays.length} payment</div></div>
+    <div class="kpi"><div class="label">Kul baaki lena</div><div class="v num" style="color:${L.balance>0?"var(--gold)":"inherit"}">${inr(L.balance)}</div><div class="s">ab tak ki kamai − diya gaya</div></div>
+    <div class="kpi"><div class="label">Chalu jobs</div><div class="v num">${L.active.length}</div><div class="s">anumaanit ${inr(L.pending)} aur</div></div>
+  </div>
+  <div class="section-t"><h2>Jobs ka hisab</h2><span style="color:var(--muted);font-size:13px">Final − Saman = Bachat × %</span></div>
+  ${L.done.length?`<div class="ledger">${L.done.map(({j,e,at})=>`<button class="lrow" data-act="openJob" data-id="${esc(j.id)}"><div class="l1"><span><b>${esc(j.no||"")}</b> ${esc(j.customer)} · ${esc(j.device)}</span><span class="num amt">+${inr(e.earn)}</span></div><div class="l2 num">${calcLine(e)}${e.final?"":" · <i>final amount nahi bhara, estimate liya</i>"}</div><div class="l3">${esc(new Date(at).toLocaleDateString("en-IN",{day:"numeric",month:"short"}))}</div></button>`).join("")}</div>`:`<div class="empty">Is samay me koi delivered job nahi hai. Job "Delivered" hote hi kamai yahan judegi.</div>`}
+  <div class="section-t"><h2>Payment mila</h2></div>
+  ${L.pays.length?`<div class="ledger">${L.pays.map(p=>`<div class="lrow"><div class="l1"><span>${esc(fmtDate(p.date))}${p.note?" · "+esc(p.note):""}</span><span class="num">−${inr(p.amt)}${admin?` <button class="x" data-act="delPayout" data-sid="${esc(s.id)}" data-i="${p.i}" aria-label="Payment hatao">×</button>`:""}</span></div></div>`).join("")}</div>`:`<div class="empty">Is samay me koi payment entry nahi hai.</div>`}
+  ${admin?`<form class="form" id="payForm" style="margin-top:14px"><div class="frow"><div class="f"><label for="pAmt">Payment diya (₹)</label><input id="pAmt" type="number" min="1" step="1" required placeholder="${L.balance>0?Math.round(L.balance):""}"></div><div class="f"><label for="pDate">Date</label><input id="pDate" type="date" value="${today()}"></div></div><div class="f"><label for="pNote">Note</label><input id="pNote" placeholder="Jaise: Cash, UPI, advance"></div><div class="actions"><button class="btn gold" type="submit">+ Payment add karo</button></div></form>`:""}`;
+}
 const nextNo = (arr, field, prefix, start) => {
   const max = arr.reduce((m,x)=>{ const n = parseInt(String(x[field]||"").replace(/\D/g,""),10); return isFinite(n)&&n>m?n:m; }, start);
   return prefix + String(max+1).padStart(prefix==="HB-"?4:3,"0");
@@ -397,6 +462,7 @@ async function run(fn, ok){
 }
 const get = (col,id) => S.data[col].find(x=>x.id===id);
 
+function setMe(){ const em=(S.user&&S.user.email||"").toLowerCase(); S.me=S.data.staff.find(x=>(x.email||"").toLowerCase()===em)||null; }
 async function loadCol(col){
   const { data, error } = await S.db.from(TBL(col)).select("id,data,created_at").order("created_at",{ascending:false}).limit(5000);
   if(error) throw error;
@@ -406,7 +472,7 @@ async function loadAll(){
   const timer=setTimeout(()=>{ if(S.mode==="loading"){ S.mode="slow"; render(); } },10000);
   try{
     await Promise.all(COLS.map(loadCol));
-    S.mode="live";
+    setMe(); S.mode="live";
   }catch(e){ console.error(e); S.mode="error"; S.err=e&&(e.message||e.code)||""; }
   clearTimeout(timer); render();
 }
@@ -415,7 +481,7 @@ function subscribe(){
   const t={};
   S.chan=S.db.channel("hb-desk");
   COLS.forEach(col=>S.chan.on("postgres_changes",{event:"*",schema:"public",table:TBL(col)},()=>{
-    clearTimeout(t[col]); t[col]=setTimeout(()=>loadCol(col).then(render).catch(()=>{}),400);
+    clearTimeout(t[col]); t[col]=setTimeout(()=>loadCol(col).then(()=>{ setMe(); render(); }).catch(()=>{}),400);
   }));
   S.chan.subscribe();
 }
@@ -424,6 +490,7 @@ async function startSession(session){
   const { data:me } = await S.db.from("desk_members").select("role").eq("email",(S.user.email||"").toLowerCase()).maybeSingle();
   if(!me){ S.mode="error"; S.err="ye email app ka member nahi hai"; S.canWrite=false; render(); return; }
   S.role=me.role; S.canWrite=true;
+  if(!curViews().some(v=>v.k===S.view)) S.view="home";
   await loadAll(); subscribe();
 }
 function showLogin(msg){
@@ -464,24 +531,27 @@ function accountSheet(){
 }
 
 /* ---------- shell ---------- */
-function navHtml(){ return VIEWS.map(v=>`<a href="#${v.k}" class="${S.view===v.k?"on":""}" ${S.view===v.k?'aria-current="page"':""}>${ICON[v.k]}<span>${v.l}</span></a>`).join(""); }
+function navHtml(){ return curViews().map(v=>`<a href="#${v.k}" class="${S.view===v.k?"on":""}" ${S.view===v.k?'aria-current="page"':""}>${ICON[v.k]}<span>${v.l}</span></a>`).join(""); }
 function bannerHtml(){
   const b=[];
   
   if(S.mode==="slow") b.push(`<div class="banner">Data abhi load nahi ho paaya. Internet check kariye, page khud update ho jayega.</div>`);
   if(S.mode==="error") b.push(`<div class="banner err">Data load nahi hua${S.err?" ("+esc(S.err)+")":""}. Page dobara kholiye.</div>`);
+  if(S.role==="staff" && S.mode==="live" && !S.me) b.push(`<div class="banner">Aapka staff record abhi link nahi hai. Admin se kahiye Staff me aapka login email bhar de.</div>`);
   if(!S.canWrite) b.push(`<div class="banner">Aapke paas sirf dekhne ki permission hai. Admin se access maangiye.</div>`);
   return b.join("");
 }
 function render(){
   $("#sideNav").innerHTML = navHtml();
   $("#bottomNav").innerHTML = navHtml();
+  $("#bottomNav").style.gridTemplateColumns = `repeat(${curViews().length},1fr)`;
   $("#banner").innerHTML = bannerHtml();
   $("#quickAddBtn").hidden = !S.canWrite;
   const scrollY = window.scrollY;
   const focusId = document.activeElement && document.activeElement.id;
   const sel = focusId && document.activeElement.selectionStart;
-  $("#view").innerHTML = ({home:vHome,status:vStatus,sales:vSales,bills:vBills,staff:vStaff}[S.view])();
+  if(!curViews().some(v=>v.k===S.view)) S.view="home";
+  $("#view").innerHTML = ({home:isAdmin()||!S.role?vHome:vHomeStaff,status:vStatus,sales:vSales,bills:vBills,staff:vStaff,kamai:vKamai}[S.view])();
   if(focusId && $("#"+focusId) && $("#view").contains($("#"+focusId))){ const el=$("#"+focusId); el.focus(); try{ el.setSelectionRange(sel,sel);}catch(e){} }
   window.scrollTo(0,scrollY);
 }
@@ -517,6 +587,33 @@ function vHome(){
 }
 const emptyJobs = () => `<div class="empty"><b>Abhi koi job nahi hai</b>Customer ka phone aaye to naya job banaiye. Uska status yahan track hoga.${S.canWrite?`<br><button class="btn gold" data-act="newJob">+ Pehla job banao</button>`:""}</div>`;
 
+function vHomeStaff(){
+  const d=new Date(), me=S.me;
+  const greet = d.getHours()<12?"Good morning":d.getHours()<17?"Namaste":"Good evening";
+  const mine=me?S.data.jobs.filter(j=>j.assignedTo===me.id):[];
+  const active=mine.filter(j=>!["delivered","cancelled"].includes(j.status));
+  const L=me&&me.pay==="commission"?ledger(me,"month"):null;
+  return `
+  <div class="vhead"><div><h1>${greet}${me?", "+esc(String(me.name).split(" ")[0]):""} 🙏</h1><p>${d.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"})} · Aapka aaj ka kaam</p></div></div>
+  <div class="kpis">
+    <div class="kpi hero"><div class="label">Is mahine meri kamai</div><div class="v num">${L?inr(L.earned):"—"}</div><div class="s">${L?L.done.length+" jobs delivered":"commission set nahi"}</div></div>
+    <div class="kpi"><div class="label">Baaki lena</div><div class="v num">${L?inr(L.balance):"—"}</div><div class="s">shop se</div></div>
+    <div class="kpi"><div class="label">Mere chalu jobs</div><div class="v num">${active.length}</div><div class="s">${active.filter(j=>j.status==="ready").length} ready</div></div>
+    <div class="kpi"><div class="label">Anumaanit aur</div><div class="v num">${L?inr(L.pending):"—"}</div><div class="s">chalu jobs se</div></div>
+  </div>
+  <div class="quick" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+    <button data-act="newJob"><span>${ICON.status}</span>Naya job</button>
+    <a href="#kamai" class="qa"><span>${ICON.kamai}</span>Meri Kamai</a>
+  </div>
+  <div class="section-t"><h2>Mere chalu jobs</h2><a href="#status">Sab jobs</a></div>
+  ${loadingOr(active.length?`<div class="list two">${active.sort(byNew).map(jobCard).join("")}</div>`:`<div class="empty">Abhi aapke paas koi chalu job nahi hai.<br><button class="btn gold" data-act="newJob">+ Naya job</button></div>`)}`;
+}
+function vKamai(){
+  const me=S.me;
+  return `<div class="vhead"><div><h1>Meri Kamai</h1><p>Har delivered job ka commission aur mila hua payment</p></div></div>
+  ${loadingOr(me?ledgerHtml(me,false):`<div class="empty">Aapka staff record abhi link nahi hai. Admin se kahiye Staff me aapka login email bhar de.</div>`)}`;
+}
+
 /* ---------- STATUS ---------- */
 function jobCard(j){
   return `<button class="card" data-act="openJob" data-id="${esc(j.id)}">
@@ -542,6 +639,13 @@ function vStatus(){
 function staffOptions(sel){
   return `<option value="">— Koi nahi —</option>`+S.data.staff.filter(s=>s.status!=="left"||s.id===sel).map(s=>`<option value="${esc(s.id)}" ${s.id===sel?"selected":""}>${esc(s.name)}</option>`).join("");
 }
+function amountsLocked(j){ return !isAdmin() && j && j.status==="delivered"; }
+function amountFields(e){
+  const lock=amountsLocked(e);
+  return `<div class="frow"><div class="f"><label for="jFinal">Final amount liya (₹)</label><input id="jFinal" type="number" min="0" step="1" value="${esc(e.finalAmt??"")}" placeholder="Customer se kul" ${lock?"disabled":""}></div>
+    <div class="f"><label for="jParts">Saman / parts kharch (₹)</label><input id="jParts" type="number" min="0" step="1" value="${esc(e.partsCost??"")}" placeholder="Display, battery, etc." ${lock?"disabled":""}></div></div>
+    <p class="calc num" id="jCalc"></p>${lock?`<p class="calc">Delivered job ka hisab sirf admin badal sakta hai.</p>`:""}`;
+}
 function jobForm(j){
   const e = j||{};
   openSheet(j?"Job edit karein":"Naya job", `
@@ -553,17 +657,21 @@ function jobForm(j){
     <div class="f"><label for="jProblem">Problem *</label><input id="jProblem" required value="${esc(e.problem)}" placeholder="Jaise: Display toota, charging nahi ho rahi"></div>
     <div class="frow"><div class="f"><label for="jEstimate">Estimate (₹)</label><input id="jEstimate" type="number" min="0" step="1" value="${esc(e.estimate??"")}"></div>
     <div class="f"><label for="jAdvance">Advance liya (₹)</label><input id="jAdvance" type="number" min="0" step="1" value="${esc(e.advance??"")}"></div></div>
-    <div class="frow"><div class="f"><label for="jStaff">Technician</label><select id="jStaff">${staffOptions(e.assignedTo)}</select></div>
+    ${amountFields(e)}
+    <div class="frow"><div class="f"><label for="jStaff">Technician</label><select id="jStaff">${staffOptions(hasVal(e.assignedTo)?e.assignedTo:(!isAdmin()&&S.me?S.me.id:""))}</select></div>
     <div class="f"><label for="jDue">Dene ki date</label><input id="jDue" type="date" value="${esc(e.due||"")}"></div></div>
     ${j?"":`<div class="f"><label for="jStatus">Status</label><select id="jStatus">${STATUSES.slice(0,4).map(s=>`<option value="${s.k}">${s.l}</option>`).join("")}</select></div>`}
     <div class="f"><label for="jNotes">Notes</label><textarea id="jNotes" placeholder="Password, accessories jama, etc.">${esc(e.notes)}</textarea></div>
     <div class="actions"><button type="button" class="btn ghost" data-act="close">Cancel</button><button class="btn gold" type="submit">${j?"Save karein":"Job banao"}</button></div>
   </form>`, ()=>{
+    const pv=()=>{ const el=$("#jCalc"); if(!el) return; const t={...e,assignedTo:$("#jStaff").value,estimate:$("#jEstimate").value,finalAmt:$("#jFinal").value,partsCost:$("#jParts").value}; const r=jobEarn(t); el.innerHTML=r?`${esc(r.staff.name)} ki kamai: ${calcLine(r)}`:""; };
+    ["jStaff","jEstimate","jFinal","jParts"].forEach(id=>{ const el=$("#"+id); if(el){ el.addEventListener("input",pv); el.addEventListener("change",pv); } }); pv();
     $("#jobForm").addEventListener("submit", async ev=>{
       ev.preventDefault();
       const o={ customer:$("#jCustomer").value.trim(), phone:$("#jPhone").value.trim(), device:$("#jDevice").value.trim(),
         problem:$("#jProblem").value.trim(), date:$("#jDate").value||today(), estimate:num($("#jEstimate").value), advance:num($("#jAdvance").value),
         assignedTo:$("#jStaff").value, due:$("#jDue").value, notes:$("#jNotes").value.trim() };
+      if(!amountsLocked(e)){ o.finalAmt=$("#jFinal").value===""?"":num($("#jFinal").value); o.partsCost=$("#jParts").value===""?"":num($("#jParts").value); }
       if(j){
         const ok = await run(()=>saveDoc("jobs",j.id,{...j,...o}),"Job update ho gaya");
         if(ok) openJob(j.id);
@@ -591,16 +699,19 @@ function openJob(id){
       ${j.due?`<dt>Dene ki date</dt><dd>${esc(fmtDate(j.due))}</dd>`:""}
       <dt>Estimate</dt><dd class="num">${inr(j.estimate)}${num(j.advance)?` · Advance ${inr(j.advance)} · Baaki <b>${inr(balance)}</b>`:""}</dd>
       <dt>Technician</dt><dd>${esc(staffName(j.assignedTo)||"—")}</dd>
+      ${hasVal(j.finalAmt)?`<dt>Final liya</dt><dd class="num">${inr(j.finalAmt)}</dd>`:""}
+      ${hasVal(j.partsCost)?`<dt>Saman kharch</dt><dd class="num">${inr(j.partsCost)}</dd>`:""}
       ${j.notes?`<dt>Notes</dt><dd>${esc(j.notes)}</dd>`:""}
     </dl>
+    ${(()=>{ const e=jobEarn(j); if(!e) return ""; return `<div class="earnbox"><div class="eb-t">${esc(e.staff.name)} ki kamai${e.done?"":" (delivered hone par judegi)"}</div><div class="num">${calcLine(e)}</div>${e.final?"":`<div class="eb-h">Final amount nahi bhara, abhi estimate se hisab hai. Job edit karke "Final amount" aur "Saman kharch" bhariye.</div>`}</div>`; })()}
     ${S.canWrite?`<div class="section-t" style="margin-top:20px"><h2>Status badlo</h2></div>
     <div class="f" style="margin-bottom:8px"><label for="stNote">Note (optional)</label><input id="stNote" placeholder="Jaise: Display order kiya, kal aayega"></div>
     <div class="status-btns">${STATUSES.filter(s=>s.k!==j.status).map(s=>`<button class="btn sm" data-act="setStatus" data-id="${esc(j.id)}" data-s="${s.k}">${pill(s.k,s.l)}</button>`).join("")}</div>`:""}
     <div class="section-t"><h2>History</h2></div>
     <ul class="timeline">${hist.map(h=>`<li><b>${esc(stLabel(h.status))}</b>${h.note?` — ${esc(h.note)}`:""}<small>${esc(fmtTime(h.at))}</small></li>`).join("")||"<li>Koi history nahi</li>"}</ul>
     ${S.canWrite?`<div class="actions" style="margin-top:20px" id="jobActs">
-      <button class="btn danger grow" data-act="askDel" data-col="jobs" data-id="${esc(j.id)}">Delete</button>
-      <button class="btn" data-act="billFromJob" data-id="${esc(j.id)}">${ICON.bills} Bill banao</button>
+      ${isAdmin()?`<button class="btn danger grow" data-act="askDel" data-col="jobs" data-id="${esc(j.id)}">Delete</button>`:`<span style="flex:1"></span>`}
+      ${isAdmin()?`<button class="btn" data-act="billFromJob" data-id="${esc(j.id)}">${ICON.bills} Bill banao</button>`:""}
       <button class="btn gold" data-act="editJob" data-id="${esc(j.id)}">Edit</button>
     </div>`:""}`);
 }
@@ -608,7 +719,10 @@ async function setStatus(id,st){
   const j=get("jobs",id); if(!j) return;
   const note=($("#stNote")||{}).value||"";
   const history=[...(j.history||[]),{status:st,note:note.trim(),at:Date.now()}];
-  const ok = await run(()=>saveDoc("jobs",id,{...j,status:st,history}),"Status: "+stLabel(st));
+  const extra={};
+  if(st==="delivered"){ extra.deliveredAt=Date.now(); const e=jobEarn(j); if(e) extra.commPct=e.pct; }
+  else if(j.status==="delivered"){ extra.deliveredAt=null; }
+  const ok = await run(()=>saveDoc("jobs",id,{...j,...extra,status:st,history}),"Status: "+stLabel(st));
   if(ok) openJob(id);
 }
 
@@ -836,13 +950,15 @@ function vStaff(){
   const act=S.data.staff.filter(s=>(s.status||"active")==="active");
   const jobsOf=id=>S.data.jobs.filter(j=>j.assignedTo===id&&!["delivered","cancelled"].includes(j.status)).length;
   return `
-  <div class="vhead"><div><h1>Staff</h1><p>Team ki details, role aur salary</p></div>${S.canWrite?`<button class="btn gold" data-act="newStaff">+ Staff add</button>`:""}</div>
+  <div class="vhead"><div><h1>Staff</h1><p>Team, login access aur commission ka hisab</p></div>${S.canWrite?`<button class="btn gold" data-act="newStaff">+ Staff add</button>`:""}</div>
   <div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
     <div class="kpi"><div class="label">Total staff</div><div class="v num">${S.data.staff.length}</div><div class="s">${act.length} active</div></div>
-    <div class="kpi"><div class="label">Monthly salary</div><div class="v num">${inr(sum(act,"salary"))}</div><div class="s">active staff ki</div></div>
+    <div class="kpi"><div class="label">Monthly salary</div><div class="v num">${inr(sum(act.filter(s=>(s.pay||"salary")==="salary"),"salary"))}</div><div class="s">salary wale staff ki</div></div>
+    <div class="kpi"><div class="label">Is mahine commission</div><div class="v num">${inr(sum(S.data.staff.filter(s=>s.pay==="commission"),s=>ledger(s,"month").earned))}</div><div class="s">delivered jobs se</div></div>
+    <div class="kpi"><div class="label">Commission baaki dena</div><div class="v num">${inr(sum(S.data.staff.filter(s=>s.pay==="commission"),s=>Math.max(0,ledger(s,"all").balance)))}</div><div class="s">sab staff ka</div></div>
   </div>
   <div class="toolbar" style="margin-top:12px"><label class="search">${ICON.search}<input id="staffQ" type="search" placeholder="Naam, role ya phone" value="${esc(S.staffQ)}" data-in="staffQ"></label></div>
-  ${loadingOr(list.length?`<div class="list two">${list.map(s=>{ const st=STAFF_ST.find(x=>x.k===(s.status||"active"))||STAFF_ST[0]; return `<button class="card" data-act="editStaff" data-id="${esc(s.id)}"><div class="row" style="align-items:center"><div class="avatar">${esc(initials(s.name))}</div><div style="flex:1;min-width:0"><div class="t">${esc(s.name)}</div><div class="sub">${esc(s.role||"")}${s.phone?" · "+esc(s.phone):""}</div></div>${pill(st.k,st.l)}</div><div class="meta">${num(s.salary)?`<span>Salary ${inr(s.salary)}/mahina</span>`:""}${s.joined?`<span>Join ${esc(fmtDate(s.joined))}</span>`:""}<span>${jobsOf(s.id)} chalu jobs</span></div></button>`; }).join("")}</div>`
+  ${loadingOr(list.length?`<div class="list two">${list.map(s=>{ const st=STAFF_ST.find(x=>x.k===(s.status||"active"))||STAFF_ST[0]; return `<button class="card" data-act="openStaff" data-id="${esc(s.id)}"><div class="row" style="align-items:center"><div class="avatar">${esc(initials(s.name))}</div><div style="flex:1;min-width:0"><div class="t">${esc(s.name)}</div><div class="sub">${esc(s.role||"")}${s.phone?" · "+esc(s.phone):""}</div></div>${pill(st.k,st.l)}</div><div class="meta">${s.pay==="commission"?`<span>Commission ${num(hasVal(s.commPct)?s.commPct:50)}%</span><span>Is mahine ${inr(ledger(s,"month").earned)}</span><span>Baaki ${inr(ledger(s,"all").balance)}</span>`:num(s.salary)?`<span>Salary ${inr(s.salary)}/mahina</span>`:""}${s.email?`<span>🔑 Login</span>`:""}${s.joined?`<span>Join ${esc(fmtDate(s.joined))}</span>`:""}<span>${jobsOf(s.id)} chalu jobs</span></div></button>`; }).join("")}</div>`
     : S.data.staff.length?`<div class="empty">Koi staff match nahi hua.</div>`:`<div class="empty"><b>Abhi koi staff add nahi hai</b>Technician, trainer ya counter staff add kariye. Jobs unhe assign ho sakengi.${S.canWrite?`<br><button class="btn gold" data-act="newStaff">+ Pehla staff add karo</button>`:""}</div>`)}`;
 }
 function staffForm(s){
@@ -853,20 +969,56 @@ function staffForm(s){
     <div class="f"><label for="tPhone">Mobile no.</label><input id="tPhone" inputmode="tel" value="${esc(e.phone)}"></div></div>
     <div class="frow"><div class="f"><label for="tRole">Role</label><select id="tRole">${ROLES.map(r=>`<option ${r===(e.role||"Technician")?"selected":""}>${r}</option>`).join("")}</select></div>
     <div class="f"><label for="tStatus">Status</label><select id="tStatus">${STAFF_ST.map(r=>`<option value="${r.k}" ${r.k===(e.status||"active")?"selected":""}>${r.l}</option>`).join("")}</select></div></div>
-    <div class="frow"><div class="f"><label for="tSalary">Salary / mahina (₹)</label><input id="tSalary" type="number" min="0" step="1" value="${esc(e.salary??"")}"></div>
+    <div class="frow"><div class="f"><label for="tPay">Payment kaise</label><select id="tPay">${PAY_TYPES.map(p=>`<option value="${p.k}" ${p.k===(e.pay||"commission")?"selected":""}>${p.l}</option>`).join("")}</select></div>
+    <div class="f" id="tCommF"><label for="tComm">Commission % (bachat ka)</label><input id="tComm" type="number" min="0" max="100" step="1" value="${esc(hasVal(e.commPct)?e.commPct:50)}"></div>
+    <div class="f" id="tSalF"><label for="tSalary">Salary / mahina (₹)</label><input id="tSalary" type="number" min="0" step="1" value="${esc(e.salary??"")}"></div></div>
+    <div class="frow"><div class="f"><label for="tEmail">Login email (app me login ke liye)</label><input id="tEmail" type="email" value="${esc(e.email)}" placeholder="staff@gmail.com"></div>
     <div class="f"><label for="tJoined">Joining date</label><input id="tJoined" type="date" value="${esc(e.joined||"")}"></div></div>
+    <p class="calc">Login email bharne se ye staff app me sirf apne jobs aur apni kamai dekh payega. Sales, bills aur dusre staff ka hisab nahi dikhega. Naye email ka password Supabase me banana hoga (admin batayega).</p>
     <div class="f"><label for="tAddr">Address</label><input id="tAddr" value="${esc(e.address)}"></div>
     <div class="f"><label for="tNotes">Notes</label><textarea id="tNotes" placeholder="Skills, timing, ID proof, etc.">${esc(e.notes)}</textarea></div>
     <div id="delZone"></div>
     <div class="actions">${s&&S.canWrite?`<button type="button" class="btn danger grow" data-act="askDel" data-col="staff" data-id="${esc(s.id)}">Delete</button>`:""}<button type="button" class="btn ghost" data-act="close">Cancel</button>${S.canWrite?`<button class="btn gold" type="submit">${s?"Save karein":"Staff add karo"}</button>`:""}</div>
   </form>`, ()=>{
+    const tog=()=>{ const c=$("#tPay").value==="commission"; $("#tCommF").hidden=!c; $("#tSalF").hidden=c; };
+    $("#tPay").addEventListener("change",tog); tog();
     $("#staffForm").addEventListener("submit", async ev=>{
       ev.preventDefault();
       const o={ name:$("#tName").value.trim(), phone:$("#tPhone").value.trim(), role:$("#tRole").value, status:$("#tStatus").value,
-        salary:num($("#tSalary").value), joined:$("#tJoined").value, address:$("#tAddr").value.trim(), notes:$("#tNotes").value.trim() };
-      const ok = s ? await run(()=>saveDoc("staff",s.id,{...s,...o}),"Staff update ho gaya") : await run(()=>addDoc("staff",o),o.name+" add ho gaye");
-      if(ok) closeSheet();
+        pay:$("#tPay").value, commPct:num($("#tComm").value), salary:num($("#tSalary").value), email:$("#tEmail").value.trim().toLowerCase(),
+        joined:$("#tJoined").value, address:$("#tAddr").value.trim(), notes:$("#tNotes").value.trim() };
+      const ok = await run(async ()=>{
+        const oldEmail=(e.email||"").toLowerCase();
+        if(s) await saveDoc("staff",s.id,{...s,...o}); else await addDoc("staff",{...o,payouts:[]});
+        await syncMember(oldEmail,o.email,o.status);
+      }, s?"Staff update ho gaya":o.name+" add ho gaye");
+      if(ok){ if(s) openStaff(s.id); else closeSheet(); }
     });
+  });
+}
+
+async function syncMember(oldEmail,email,status){
+  const adminEmail=(S.user&&S.user.email||"").toLowerCase();
+  if(oldEmail && oldEmail!==email && oldEmail!==adminEmail){ const r=await S.db.from("desk_members").delete().eq("email",oldEmail).eq("role","staff"); if(r.error) throw r.error; }
+  if(!email || email===adminEmail) return;
+  if(status==="left"){ const r=await S.db.from("desk_members").delete().eq("email",email).eq("role","staff"); if(r.error) throw r.error; return; }
+  const ex=await S.db.from("desk_members").select("role").eq("email",email).maybeSingle();
+  if(ex.error) throw ex.error;
+  if(!ex.data){ const r=await S.db.from("desk_members").insert({email,role:"staff"}); if(r.error) throw r.error; }
+}
+function openStaff(id){
+  const s=get("staff",id); if(!s){ closeSheet(); return; }
+  const st=STAFF_ST.find(x=>x.k===(s.status||"active"))||STAFF_ST[0];
+  openSheet(esc(s.name),`
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${pill(st.k,st.l)}<span style="color:var(--muted);font-size:13px">${esc(s.role||"")}${s.phone?" · "+esc(s.phone):""}${s.email?" · 🔑 "+esc(s.email):" · login nahi"}</span></div>
+    <div style="margin-top:14px">${ledgerHtml(s,true)}</div>
+    <div class="actions" style="margin-top:18px"><button class="btn gold" data-act="editStaff" data-id="${esc(s.id)}">Details edit karo</button></div>`, ()=>{
+    const f=$("#payForm"); if(!f) return;
+    f.addEventListener("submit", async ev=>{ ev.preventDefault();
+      const amt=num($("#pAmt").value); if(amt<=0) return;
+      const payouts=[...(s.payouts||[]),{amt,date:$("#pDate").value||today(),note:$("#pNote").value.trim(),at:Date.now()}];
+      const ok=await run(()=>saveDoc("staff",s.id,{...s,payouts}),"Payment add ho gaya: "+inr(amt));
+      if(ok) openStaff(s.id); });
   });
 }
 
@@ -884,7 +1036,7 @@ const ACT = {
   close: closeSheet,
   account: ()=>accountSheet(),
   logout: async ()=>{ closeSheet(); await S.db.auth.signOut(); },
-  quickAdd: ()=>({status:jobForm,sales:saleForm,bills:billForm,staff:staffForm}[S.view]||jobForm)(),
+  quickAdd: ()=>(isAdmin()?({status:jobForm,sales:saleForm,bills:billForm,staff:staffForm}[S.view]||jobForm):jobForm)(),
   newJob: ()=>jobForm(), newSale: ()=>saleForm(), newBill: ()=>billForm(), newStaff: ()=>staffForm(),
   openJob: el=>openJob(el.dataset.id), editJob: el=>jobForm(get("jobs",el.dataset.id)),
   setStatus: el=>setStatus(el.dataset.id, el.dataset.s),
@@ -895,7 +1047,11 @@ const ACT = {
   editSale: el=>saleForm(get("sales",el.dataset.id)),
   openBill: el=>openBill(el.dataset.id), editBill: el=>billForm(get("bills",el.dataset.id)),
   editStaff: el=>staffForm(get("staff",el.dataset.id)),
-  billFromJob: el=>{ const j=get("jobs",el.dataset.id); billForm(null,{customer:j.customer,phone:j.phone,jobId:j.id,status:"paid",items:[{desc:`${j.device} - ${j.problem}`,qty:1,rate:j.estimate||""}],gst:0}); },
+  openStaff: el=>openStaff(el.dataset.id),
+  kPeriod: el=>{ S.kPeriod=el.dataset.p; if(el.dataset.sid) openStaff(el.dataset.sid); else render(); },
+  delPayout: async el=>{ const s=get("staff",el.dataset.sid); const i=+el.dataset.i; const payouts=(s.payouts||[]).filter((_,k)=>k!==i);
+    const ok=await run(()=>saveDoc("staff",s.id,{...s,payouts}),"Payment entry hata di"); if(ok) openStaff(s.id); },
+  billFromJob: el=>{ const j=get("jobs",el.dataset.id); billForm(null,{customer:j.customer,phone:j.phone,jobId:j.id,status:"paid",items:[{desc:`${j.device} - ${j.problem}`,qty:1,rate:hasVal(j.finalAmt)?j.finalAmt:(j.estimate||"")}],gst:0}); },
   addLine: ()=>{ $("#lines").insertAdjacentHTML("beforeend",lineRow({desc:"",qty:1,rate:""})); $("#lines .line:last-child .li-d").focus(); },
   rmLine: el=>{ const ls=$("#lines"); if(ls.children.length>1) el.closest(".line").remove(); else el.closest(".line").querySelectorAll("input").forEach(i=>i.value=i.classList.contains("li-q")?1:""); $("#billForm")._recalc(); },
   togglePaid: async el=>{ const b=get("bills",el.dataset.id); const st=b.status==="paid"?"unpaid":"paid";
@@ -911,7 +1067,7 @@ const ACT = {
     const {col,id}=el.dataset;
     zone.innerHTML=`<div class="confirm" style="width:100%">${DEL_TEXT[col]} pakka delete karein? Wapas nahi aayega.<span style="flex:1"></span><button type="button" class="btn sm ghost" data-act="cancelDel" data-col="${col}" data-id="${esc(id)}">Nahi</button><button type="button" class="btn sm danger" data-act="doDel" data-col="${col}" data-id="${esc(id)}">Haan, delete</button></div>`;
   },
-  cancelDel: el=>{ const {col,id}=el.dataset; ({jobs:()=>openJob(id),bills:()=>openBill(id),sales:()=>saleForm(get("sales",id)),staff:()=>staffForm(get("staff",id))})[col](); },
+  cancelDel: el=>{ const {col,id}=el.dataset; ({jobs:()=>openJob(id),bills:()=>openBill(id),sales:()=>saleForm(get("sales",id)),staff:()=>openStaff(id)})[col](); },
   doDel: async el=>{ const {col,id}=el.dataset; const ok=await run(()=>delDoc(col,id),"Delete ho gaya"); if(ok) closeSheet(); }
 };
 document.addEventListener("click", ev=>{
@@ -925,9 +1081,9 @@ document.addEventListener("input", ev=>{
   S[k]=ev.target.value; render();
 });
 document.addEventListener("keydown", ev=>{ if(ev.key==="Escape" && !$("#sheet").hidden) closeSheet(); });
-function route(){ const h=location.hash.replace("#",""); S.view=VIEWS.some(v=>v.k===h)?h:"home"; closeSheet(); render(); window.scrollTo(0,0); }
+function route(){ const h=location.hash.replace("#",""); S.view=curViews().some(v=>v.k===h)?h:"home"; closeSheet(); render(); window.scrollTo(0,0); }
 window.addEventListener("hashchange", route);
-S.view = VIEWS.some(v=>v.k===location.hash.slice(1)) ? location.hash.slice(1) : "home";
+S.view = VIEWS_ALL.some(v=>v.k===location.hash.slice(1)) ? location.hash.slice(1) : "home";
 $("#lgForm").addEventListener("submit",doLogin);
 init();
 </script>
