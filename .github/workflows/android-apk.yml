@@ -1,0 +1,54 @@
+name: Build HB Desk APK
+
+on:
+  push:
+    branches: [main]
+    paths: ["android/**", ".github/workflows/android-apk.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+      - name: Signing key
+        env:
+          KS_B64: ${{ secrets.HB_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.HB_KEYSTORE_PASS }}
+        run: |
+          if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ]; then
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+            echo "HB_KS_PASS=$KS_PASS" >> "$GITHUB_ENV"
+          else
+            PASS=$(openssl rand -hex 16)
+            keytool -genkeypair -v -keystore "$RUNNER_TEMP/release.jks" -alias hbdesk -keyalg RSA -keysize 2048 \
+              -validity 10000 -storepass "$PASS" -keypass "$PASS" -dname "CN=Hello Brothers Smartstore, L=Safidon, C=IN"
+            echo "::add-mask::$PASS"
+            echo "HB_KS_PASS=$PASS" >> "$GITHUB_ENV"
+          fi
+          echo "HB_KEYSTORE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+          echo "HB_VERSION_CODE=${{ github.run_number }}" >> "$GITHUB_ENV"
+      - name: Build
+        working-directory: android
+        run: gradle --no-daemon assembleRelease
+      - name: Rename
+        run: cp android/app/build/outputs/apk/release/app-release.apk HelloBrothersDesk.apk
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: desk-apk-${{ github.run_number }}
+          name: HB Desk APK ${{ github.run_number }}
+          make_latest: true
+          body: "Hello Brothers Shop Desk Android app. Install: download HelloBrothersDesk.apk on the phone and open it."
+          files: HelloBrothersDesk.apk

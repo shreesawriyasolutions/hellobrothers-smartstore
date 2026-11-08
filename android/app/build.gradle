@@ -1,0 +1,30 @@
+plugins { id "com.android.application" }
+
+def ksFile = System.getenv("HB_KEYSTORE") ?: "release.jks"
+android {
+  namespace "com.hellobrothers.desk"
+  compileSdk 34
+  defaultConfig {
+    applicationId "com.hellobrothers.desk"
+    minSdk 24
+    targetSdk 34
+    versionCode((System.getenv("HB_VERSION_CODE") ?: "1") as int)
+    versionName "1.0." + (System.getenv("HB_VERSION_CODE") ?: "1")
+  }
+  signingConfigs {
+    release {
+      storeFile file(ksFile)
+      storePassword System.getenv("HB_KS_PASS")
+      keyAlias "hbdesk"
+      keyPassword System.getenv("HB_KS_PASS")
+    }
+  }
+  buildTypes {
+    release {
+      minifyEnabled false
+      signingConfig signingConfigs.release
+    }
+  }
+  compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+dependencies { implementation "androidx.core:core:1.13.1" }

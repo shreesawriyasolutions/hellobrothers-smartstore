@@ -996,6 +996,10 @@ function billHtmlDoc(b){
 async function saveFile(filename,data){
   try{
     const blob = data instanceof Blob ? data : new Blob([data],{type:"text/html"});
+    if(window.HBAndroid && window.HBAndroid.saveFile){
+      const b64 = await new Promise((ok,no)=>{ const r=new FileReader(); r.onload=()=>ok(String(r.result).split(",")[1]||""); r.onerror=no; r.readAsDataURL(blob); });
+      window.HBAndroid.saveFile(filename, b64, blob.type||"application/octet-stream"); return;
+    }
     const url=URL.createObjectURL(blob); const a=document.createElement("a");
     a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),4000); toast("Download ho gaya: "+filename);
