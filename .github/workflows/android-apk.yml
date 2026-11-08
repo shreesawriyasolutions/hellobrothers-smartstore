@@ -14,15 +14,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
-      - uses: android-actions/setup-android@v3
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.9"
+      - name: Gradle + Android SDK
+        id: tools
+        run: |
+          set -e
+          echo "ANDROID_HOME=$ANDROID_HOME ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          ls "$ANDROID_HOME/platforms" "$ANDROID_HOME/build-tools" | tee "$RUNNER_TEMP/build.log"
+          curl -fsSL -o "$RUNNER_TEMP/gradle.zip" https://services.gradle.org/distributions/gradle-8.9-bin.zip
+          unzip -q "$RUNNER_TEMP/gradle.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/gradle-8.9/bin" >> "$GITHUB_PATH"
+          echo "sdk.dir=$ANDROID_HOME" > android/local.properties
       - name: Signing key
+        id: sign
         env:
           KS_B64: ${{ secrets.HB_KEYSTORE_B64 }}
           KS_PASS: ${{ secrets.HB_KEYSTORE_PASS }}
@@ -40,6 +47,7 @@ jobs:
           echo "HB_KEYSTORE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
           echo "HB_VERSION_CODE=${{ github.run_number }}" >> "$GITHUB_ENV"
       - name: Build
+        id: build
         working-directory: android
         run: |
           set -o pipefail
@@ -62,4 +70,5 @@ jobs:
           grep -n -i -E "error|failed|wrong|exception|could not|not found" "$RUNNER_TEMP/build.log" | head -40 > "$RUNNER_TEMP/err.txt" || true
           tail -60 "$RUNNER_TEMP/build.log" >> "$RUNNER_TEMP/err.txt"
           MSG=$(sed -e 's/%/%25/g' "$RUNNER_TEMP/err.txt" | awk '{printf "%s%%0A", $0}' | cut -c1-60000)
-          echo "::error title=HB build log::${MSG:-no build log (failed before Build step)}"
+          STEPS=$(echo '${{ toJson(steps) }}' | tr -d '\n' | cut -c1-2000)
+          echo "::error title=HB build log::STEPS=${STEPS}%0A${MSG:-no build log}"
