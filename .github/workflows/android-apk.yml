@@ -41,7 +41,10 @@ jobs:
           echo "HB_VERSION_CODE=${{ github.run_number }}" >> "$GITHUB_ENV"
       - name: Build
         working-directory: android
-        run: gradle --no-daemon assembleRelease
+        run: |
+          set -o pipefail
+          gradle --version 2>&1 | tee "$RUNNER_TEMP/build.log"
+          gradle --no-daemon --stacktrace assembleRelease 2>&1 | tee -a "$RUNNER_TEMP/build.log"
       - name: Rename
         run: cp android/app/build/outputs/apk/release/app-release.apk HelloBrothersDesk.apk
       - name: Publish release
@@ -52,3 +55,11 @@ jobs:
           make_latest: true
           body: "Hello Brothers Shop Desk Android app. Install: download HelloBrothersDesk.apk on the phone and open it."
           files: HelloBrothersDesk.apk
+      - name: Report failure
+        if: failure()
+        run: |
+          touch "$RUNNER_TEMP/build.log"
+          grep -n -i -E "error|failed|wrong|exception|could not|not found" "$RUNNER_TEMP/build.log" | head -40 > "$RUNNER_TEMP/err.txt" || true
+          tail -60 "$RUNNER_TEMP/build.log" >> "$RUNNER_TEMP/err.txt"
+          MSG=$(sed -e 's/%/%25/g' "$RUNNER_TEMP/err.txt" | awk '{printf "%s%%0A", $0}' | cut -c1-60000)
+          echo "::error title=HB build log::${MSG:-no build log (failed before Build step)}"
